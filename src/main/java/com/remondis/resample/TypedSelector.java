@@ -14,14 +14,14 @@ package com.remondis.resample;
 @FunctionalInterface
 public interface TypedSelector<R, T> {
 
-  /**
-   * This method is used to perform a get-method invocation of the specified destination object and returning its value.
-   * This invocation tells the mapper which property is to be selected for the following configuration and what type it
-   * has.
-   *
-   * @param destination The destination object to perform a get-method invocation on.
-   * @return Returns the return value of the performed get-method call.
-   */
-  R selectField(T destination);
+	/**
+	 * This method is used to perform a get-method invocation of the specified destination object and returning its value.
+	 * This invocation tells the mapper which property is to be selected for the following configuration and what type it
+	 * has.
+	 *
+	 * @param destination The destination object to perform a get-method invocation on.
+	 * @return Returns the return value of the performed get-method call.
+	 */
+	R selectField(T destination);
 
 }

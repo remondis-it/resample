@@ -116,11 +116,10 @@ public class Sample<T> implements Supplier<T> {
 			if (!properties.isEmpty()) {
 				String message = properties.stream()
 				    .map(PropertyDescriptor::getName)
-				    .collect(
-				        () -> new StringBuilder(
-				            "The following properties were not covered by the sample generator:\nFor class '")
-				                .append(type.getName())
-				                .append("'\n"),
+				    .collect(() -> new StringBuilder(
+				        "The following properties were not covered by the sample generator:\nFor class '")
+				            .append(type.getName())
+				            .append("'\n"),
 				        (acc, str) -> acc.append("- ")
 				            .append(str)
 				            .append("\n"),

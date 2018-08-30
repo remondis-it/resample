@@ -193,20 +193,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<configuration>
-					<configLocation>${project.basedir}/shared/config/checkstyle/checkstyle.xml</configLocation>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>com.puppycrawl.tools</groupId>
-						<artifactId>checkstyle</artifactId>
-						<version>8.5</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
 				<executions>
@@ -259,14 +245,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.16.16</version>
-			<scope>provided</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>cglib</groupId>
