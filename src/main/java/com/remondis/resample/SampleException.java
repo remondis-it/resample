@@ -29,14 +29,16 @@ public class SampleException extends RuntimeException {
 	}
 
 	static SampleException multipleInteractions(List<String> trackedPropertyNames) {
-		return new SampleException(
-		    String.format("The field selector tracked multiple interactions with the following properties: %s."
-		        + " Only one interaction perfield selector is allowed!", String.join(",", trackedPropertyNames)));
+		return new SampleException(String.format(
+				"The field selector tracked multiple interactions with the following properties: %s."
+						+ " Only one interaction perfield selector is allowed!",
+				String.join(",", trackedPropertyNames)));
 	}
 
 	static SampleException notAProperty(Class<?> type, String property) {
-		return new SampleException(String.format(
-		    "The get-method for property '%s' in type %s is not a valid Java Bean property.", property, type.getName()));
+		return new SampleException(
+				String.format("The get-method for property '%s' in type %s is not a valid Java Bean property.",
+						property, type.getName()));
 	}
 
 	static SampleException valueSupplierException(Throwable e) {

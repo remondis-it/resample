@@ -41,26 +41,17 @@ public class SampleTest {
 	@Test
 	public void shouldDenyPrimitiveTypeSetting() {
 		assertThatThrownBy(() -> {
-			Sample.of(Person.class)
-			    .use(() -> 1L)
-			    .forType(Long.class)
-			    .newInstance();
-		}).isInstanceOf(IllegalArgumentException.class)
-		    .hasMessage("Type settings are not allowed for primitive types. Please specify primitive types on fields.");
+			Sample.of(Person.class).use(() -> 1L).forType(Long.class).newInstance();
+		}).isInstanceOf(IllegalArgumentException.class).hasMessage(
+				"Type settings are not allowed for primitive types. Please specify primitive types on fields.");
 	}
 
 	@Test
 	public void shouldGenerateSampleData() {
-		doReturn(STRING).when(stringSupplier)
-		    .get();
-		doReturn(LOCALDATE).when(localDateSupplier)
-		    .get();
-		Person person = Sample.of(Person.class)
-		    .use(stringSupplier)
-		    .forType(String.class)
-		    .use(localDateSupplier)
-		    .forField(Person::getBrithday)
-		    .newInstance();
+		doReturn(STRING).when(stringSupplier).get();
+		doReturn(LOCALDATE).when(localDateSupplier).get();
+		Person person = Sample.of(Person.class).use(stringSupplier).forType(String.class).use(localDateSupplier)
+				.forField(Person::getBrithday).newInstance();
 		verify(stringSupplier, times(2)).get();
 		verify(localDateSupplier, times(1)).get();
 		assertEquals(STRING, person.getName());
@@ -71,9 +62,7 @@ public class SampleTest {
 
 	@Test
 	public void shouldIgnoreNullFields() {
-		Person person = Sample.of(Person.class)
-		    .ignoreNullFields()
-		    .newInstance();
+		Person person = Sample.of(Person.class).ignoreNullFields().newInstance();
 		assertNull(person.getBrithday());
 		assertNull(person.getName());
 		assertNull(person.getForname());
@@ -83,60 +72,40 @@ public class SampleTest {
 	@Test
 	public void shouldDenyNullFieldsAsDefault() {
 		assertThatThrownBy(() -> {
-			Sample.of(Person.class)
-			    .newInstance();
+			Sample.of(Person.class).newInstance();
 		}).isInstanceOf(SampleException.class)
-		    .hasMessageContaining("The following properties were not covered by the sample generator:");
+				.hasMessageContaining("The following properties were not covered by the sample generator:");
 	}
 
 	@Test
 	public void shouldDenyNullFields() {
 		assertThatThrownBy(() -> {
-			Sample.of(Person.class)
-			    .ignoreNullFields()
-			    .checkForNullFields()
-			    .newInstance();
+			Sample.of(Person.class).ignoreNullFields().checkForNullFields().newInstance();
 		}).isInstanceOf(SampleException.class)
-		    .hasMessageContaining("The following properties were not covered by the sample generator:");
+				.hasMessageContaining("The following properties were not covered by the sample generator:");
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void fieldSettingsShouldOverrideTypeSettings() {
 		String OVERRIDDEN_STRING = "thisShouldBeOverridden";
-		doReturn(OVERRIDDEN_STRING).when(stringSupplier)
-		    .get();
+		doReturn(OVERRIDDEN_STRING).when(stringSupplier).get();
 		LocalDate OVERRIDDEN_LOCAL_DATE = LocalDate.of(1, 1, 1);
-		doReturn(OVERRIDDEN_LOCAL_DATE).when(localDateSupplier)
-		    .get();
+		doReturn(OVERRIDDEN_LOCAL_DATE).when(localDateSupplier).get();
 
 		Supplier<String> stringOverridden = Mockito.mock(Supplier.class);
 		Supplier<LocalDate> localDateOverridden = Mockito.mock(Supplier.class);
 
-		doReturn(OVERRIDDEN_STRING).when(stringOverridden)
-		    .get();
-		doReturn(OVERRIDDEN_LOCAL_DATE).when(localDateOverridden)
-		    .get();
+		doReturn(OVERRIDDEN_STRING).when(stringOverridden).get();
+		doReturn(OVERRIDDEN_LOCAL_DATE).when(localDateOverridden).get();
 
-		doReturn(STRING).when(stringSupplier)
-		    .get();
-		doReturn(LOCALDATE).when(localDateSupplier)
-		    .get();
+		doReturn(STRING).when(stringSupplier).get();
+		doReturn(LOCALDATE).when(localDateSupplier).get();
 
-		Person person = Sample.of(Person.class)
-		    .use(stringOverridden)
-		    .forType(String.class)
-		    .use(localDateOverridden)
-		    .forType(LocalDate.class)
-		    .use(stringSupplier)
-		    .forField(Person::getForname)
-		    .use(stringSupplier)
-		    .forField(Person::getName)
-		    .use(localDateSupplier)
-		    .forField(Person::getBrithday)
-		    .use(() -> 99)
-		    .forField(Person::getAge)
-		    .newInstance();
+		Person person = Sample.of(Person.class).use(stringOverridden).forType(String.class).use(localDateOverridden)
+				.forType(LocalDate.class).use(stringSupplier).forField(Person::getForname).use(stringSupplier)
+				.forField(Person::getName).use(localDateSupplier).forField(Person::getBrithday).use(() -> 99)
+				.forField(Person::getAge).newInstance();
 
 		verify(stringOverridden, times(0)).get();
 		verify(localDateOverridden, times(0)).get();
@@ -155,35 +124,20 @@ public class SampleTest {
 
 		Supplier<ZonedDateTime> zonedDateTimeSupplier = Mockito.mock(Supplier.class);
 		ZonedDateTime EXPECTED_DATE = ZonedDateTime.of(2018, 8, 30, 1, 1, 1, 0, ZoneId.of("Europe/Berlin"));
-		doReturn(EXPECTED_DATE).when(zonedDateTimeSupplier)
-		    .get();
+		doReturn(EXPECTED_DATE).when(zonedDateTimeSupplier).get();
 
-		Sample<Address> adressSampler = Sample.of(Address.class)
-		    .checkForNullFields()
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class);
+		Sample<Address> adressSampler = Sample.of(Address.class).checkForNullFields().use(fieldNameStringSupplier())
+				.forType(String.class);
 
-		Sample<ForeignOperatorInfo> foiSampler = Sample.of(ForeignOperatorInfo.class)
-		    .checkForNullFields()
-		    .useSample(adressSampler)
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class);
+		Sample<ForeignOperatorInfo> foiSampler = Sample.of(ForeignOperatorInfo.class).checkForNullFields()
+				.useSample(adressSampler).use(fieldNameStringSupplier()).forType(String.class);
 
-		Sample<Facility> facilitySampler = Sample.of(Facility.class)
-		    .checkForNullFields()
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class)
-		    .useSample(adressSampler);
+		Sample<Facility> facilitySampler = Sample.of(Facility.class).checkForNullFields().use(fieldNameStringSupplier())
+				.forType(String.class).useSample(adressSampler);
 
-		Plant plant = Sample.of(Plant.class)
-		    .checkForNullFields()
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class)
-		    .use(zonedDateTimeSupplier)
-		    .forType(ZonedDateTime.class)
-		    .useSample(foiSampler)
-		    .useSample(facilitySampler)
-		    .newInstance();
+		Plant plant = Sample.of(Plant.class).checkForNullFields().use(fieldNameStringSupplier()).forType(String.class)
+				.use(zonedDateTimeSupplier).forType(ZonedDateTime.class).useSample(foiSampler)
+				.useSample(facilitySampler).newInstance();
 
 		assertEquals(0L, (long) plant.getId());
 		assertEquals(0L, (long) plant.getPlantIdPrevious());

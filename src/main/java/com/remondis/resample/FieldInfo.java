@@ -1,7 +1,8 @@
 package com.remondis.resample;
 
 /**
- * Contains some information about the field for which sample data should be generated.
+ * Contains some information about the field for which sample data should be
+ * generated.
  */
 public class FieldInfo {
 

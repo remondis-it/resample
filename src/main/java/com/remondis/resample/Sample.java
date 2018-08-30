@@ -17,15 +17,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * The {@link Sample} class can generate instances of beans containing sample data. You can configure data factories
- * per field. Note that the type to generate sample instances for must be a Java Bean:
+ * The {@link Sample} class can generate instances of beans containing sample
+ * data. You can configure data factories per field. Note that the type to
+ * generate sample instances for must be a Java Bean:
  *
  * <ul>
  * <li>A property is a field with any visibility</li>
- * <li>A property has a
- * public getter/setter pair exactly named as the field</li>
- * <li>Boolean values have is/setter
- * methods.</li>
+ * <li>A property has a public getter/setter pair exactly named as the
+ * field</li>
+ * <li>Boolean values have is/setter methods.</li>
  * <li>A bean has a default zero-args constructor.</li>
  * </ul>
  *
@@ -78,7 +78,7 @@ public class Sample<T> implements Supplier<T> {
 	<S> void addTypeSetting(Function<FieldInfo, S> supplier, Class<? super S> type) {
 		if (isPrimitive(type)) {
 			throw new IllegalArgumentException(
-			    "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
+					"Type settings are not allowed for primitive types. Please specify primitive types on fields.");
 		}
 		this.typeSettings.put(type, supplier);
 	}
@@ -93,7 +93,8 @@ public class Sample<T> implements Supplier<T> {
 			T newInstance = constructor.newInstance();
 			// Set all primitive properties
 			Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
-			// Execute all type registered factories but skip the properties in the set of field configurations.
+			// Execute all type registered factories but skip the properties in the set of
+			// field configurations.
 			Set<PropertyDescriptor> hitByType = setAllValuesFromTypeSettingsExcludingFieldSettings(newInstance);
 			// Execute all the fieldConfigurations
 			Set<PropertyDescriptor> hitByField = setAllValuesFromFieldSettings(newInstance);
@@ -114,58 +115,42 @@ public class Sample<T> implements Supplier<T> {
 			Set<PropertyDescriptor> properties = Properties.getProperties(type);
 			properties.removeAll(hitProperties);
 			if (!properties.isEmpty()) {
-				String message = properties.stream()
-				    .map(PropertyDescriptor::getName)
-				    .collect(() -> new StringBuilder(
-				        "The following properties were not covered by the sample generator:\nFor class '")
-				            .append(type.getName())
-				            .append("'\n"),
-				        (acc, str) -> acc.append("- ")
-				            .append(str)
-				            .append("\n"),
-				        (sb1, sb2) -> sb1.append(sb2.toString()))
-				    .toString();
+				String message = properties.stream().map(PropertyDescriptor::getName)
+						.collect(() -> new StringBuilder(
+								"The following properties were not covered by the sample generator:\nFor class '")
+										.append(type.getName()).append("'\n"),
+								(acc, str) -> acc.append("- ").append(str).append("\n"),
+								(sb1, sb2) -> sb1.append(sb2.toString()))
+						.toString();
 				throw new SampleException(message);
 			}
 		}
 	}
 
 	private Set<PropertyDescriptor> setAllValuesForPrimitiveFields(T newInstance) {
-		return Properties.getProperties(type)
-		    .stream()
-		    .filter(pd -> {
-			    return isPrimitive(pd.getPropertyType());
-		    })
-		    .map(pd -> {
-			    setValueFromPrimitive(newInstance, pd);
-			    return pd;
-		    })
-		    .collect(Collectors.toSet());
+		return Properties.getProperties(type).stream().filter(pd -> {
+			return isPrimitive(pd.getPropertyType());
+		}).map(pd -> {
+			setValueFromPrimitive(newInstance, pd);
+			return pd;
+		}).collect(Collectors.toSet());
 	}
 
 	private Set<PropertyDescriptor> setAllValuesFromFieldSettings(T newInstance) {
-		return fieldSettings.entrySet()
-		    .stream()
-		    .map(e -> {
-			    PropertyDescriptor pd = e.getKey();
-			    setValueFromFieldSetting(newInstance, pd);
-			    return pd;
-		    })
-		    .collect(Collectors.toSet());
+		return fieldSettings.entrySet().stream().map(e -> {
+			PropertyDescriptor pd = e.getKey();
+			setValueFromFieldSetting(newInstance, pd);
+			return pd;
+		}).collect(Collectors.toSet());
 	}
 
 	private Set<PropertyDescriptor> setAllValuesFromTypeSettingsExcludingFieldSettings(T newInstance) {
-		return Properties.getProperties(type)
-		    .stream()
-		    .filter(pd -> {
-			    return !fieldSettings.containsKey(pd);
-		    })
-		    .filter(pd -> typeSettings.containsKey(pd.getPropertyType()))
-		    .map(pd -> {
-			    setValueFromTypeSetting(newInstance, pd);
-			    return pd;
-		    })
-		    .collect(Collectors.toSet());
+		return Properties.getProperties(type).stream().filter(pd -> {
+			return !fieldSettings.containsKey(pd);
+		}).filter(pd -> typeSettings.containsKey(pd.getPropertyType())).map(pd -> {
+			setValueFromTypeSetting(newInstance, pd);
+			return pd;
+		}).collect(Collectors.toSet());
 	}
 
 	private void setValueFromPrimitive(T newInstance, PropertyDescriptor pd) {
@@ -212,25 +197,13 @@ public class Sample<T> implements Supplier<T> {
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName())
-		    .append("'\n");
-		fieldSettings.entrySet()
-		    .stream()
-		    .forEach(e -> {
-			    b.append("- applying value factory for field '")
-			        .append(e.getKey()
-			            .getReadMethod()
-			            .getName())
-			        .append("'\n");
-		    });
-		typeSettings.entrySet()
-		    .stream()
-		    .forEach(e -> {
-			    b.append("- applying value factory producing ")
-			        .append(e.getKey()
-			            .getName())
-			        .append("\n");
-		    });
+		StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName()).append("'\n");
+		fieldSettings.entrySet().stream().forEach(e -> {
+			b.append("- applying value factory for field '").append(e.getKey().getReadMethod().getName()).append("'\n");
+		});
+		typeSettings.entrySet().stream().forEach(e -> {
+			b.append("- applying value factory producing ").append(e.getKey().getName()).append("\n");
+		});
 		return b.toString();
 	}
 

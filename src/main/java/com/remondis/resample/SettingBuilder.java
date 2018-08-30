@@ -57,22 +57,20 @@ public class SettingBuilder<T, S> {
 	}
 
 	/**
-	 * Ensures that the specified property name is a property in the specified {@link Set} of {@link
-	 * PropertyDescriptor}s.
+	 * Ensures that the specified property name is a property in the specified
+	 * {@link Set} of {@link PropertyDescriptor}s.
 	 *
-	 * @param target Defines if the properties are validated against source or target rules.
+	 * @param target
+	 *            Defines if the properties are validated against source or target
+	 *            rules.
 	 * @param type
-	 *        The inspected type.
+	 *            The inspected type.
 	 * @param propertyName
-	 *        The property name
+	 *            The property name
 	 */
 	static PropertyDescriptor getPropertyDescriptorOrFail(Class<?> type, String propertyName) {
 		Optional<PropertyDescriptor> property;
-		property = Properties.getProperties(type)
-		    .stream()
-		    .filter(pd -> pd.getName()
-		        .equals(propertyName))
-		    .findFirst();
+		property = Properties.getProperties(type).stream().filter(pd -> pd.getName().equals(propertyName)).findFirst();
 		if (property.isPresent()) {
 			return property.get();
 		} else {

@@ -15,7 +15,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
- * This is a util class that provides useful reflective methods. <b>Intended for internal use only!</b>.
+ * This is a util class that provides useful reflective methods. <b>Intended for
+ * internal use only!</b>.
  *
  * @author schuettec
  */
@@ -78,21 +79,27 @@ class ReflectionUtil {
 	}
 
 	/**
-	 * Checks if the specified type is a Java build-in type. The build-in types are the object versions of the Java
-	 * primitives like {@link Integer}, {@link Long} but also {@link String}.
+	 * Checks if the specified type is a Java build-in type. The build-in types are
+	 * the object versions of the Java primitives like {@link Integer}, {@link Long}
+	 * but also {@link String}.
 	 *
-	 * @param type The type to check
-	 * @return Returns <code>true</code> if the specified type is a java build-in type.
+	 * @param type
+	 *            The type to check
+	 * @return Returns <code>true</code> if the specified type is a java build-in
+	 *         type.
 	 */
 	public static boolean isPrimitive(Class<?> type) {
 		return DEFAULT_VALUES.containsKey(type);
 	}
 
 	/**
-	 * Returns the default value for the specified primitive type according to the Java Language Specification. See
-	 * https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html for more information.
+	 * Returns the default value for the specified primitive type according to the
+	 * Java Language Specification. See
+	 * https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html for
+	 * more information.
 	 *
-	 * @param type The type of the primitive.
+	 * @param type
+	 *            The type of the primitive.
 	 * @return Returns the default value of the specified primitive type.
 	 */
 	@SuppressWarnings("unchecked")
@@ -101,16 +108,19 @@ class ReflectionUtil {
 			return (T) DEFAULT_VALUES.get(type);
 		} else {
 			throw new IllegalArgumentException(
-			    String.format("Type '%s' is not a primitive or wrapper-type.", type.getName()));
+					String.format("Type '%s' is not a primitive or wrapper-type.", type.getName()));
 		}
 	}
 
 	/**
-	 * This method selects a {@link Collector} according to the specified {@link Collection} instance. This method
-	 * currently supports {@link Set} and {@link List}.
+	 * This method selects a {@link Collector} according to the specified
+	 * {@link Collection} instance. This method currently supports {@link Set} and
+	 * {@link List}.
 	 *
-	 * @param collection The actual collection instance.
-	 * @return Returns the {@link Collector} that creates a new {@link Collection} of the same type.
+	 * @param collection
+	 *            The actual collection instance.
+	 * @return Returns the {@link Collector} that creates a new {@link Collection}
+	 *         of the same type.
 	 */
 	@SuppressWarnings("rawtypes")
 	static Collector getCollector(Collection collection) {
@@ -126,12 +136,13 @@ class ReflectionUtil {
 	/**
 	 * Checks if the method has a return type.
 	 *
-	 * @param method the method
-	 * @return <code>true</code>, if return type is not {@link Void} or <code>false</code> otherwise.
+	 * @param method
+	 *            the method
+	 * @return <code>true</code>, if return type is not {@link Void} or
+	 *         <code>false</code> otherwise.
 	 */
 	static boolean hasReturnType(Method method) {
-		return !method.getReturnType()
-		    .equals(Void.TYPE);
+		return !method.getReturnType().equals(Void.TYPE);
 	}
 
 	static boolean isGetterOrSetter(Method method) {
@@ -139,8 +150,7 @@ class ReflectionUtil {
 	}
 
 	static boolean isSetter(Method method) {
-		boolean validName = method.getName()
-		    .startsWith(SET);
+		boolean validName = method.getName().startsWith(SET);
 		boolean hasArguments = hasArguments(method, 1);
 		boolean hasReturnType = hasReturnType(method);
 		return validName && !hasReturnType && hasArguments;
@@ -148,10 +158,7 @@ class ReflectionUtil {
 
 	static boolean isGetter(Method method) {
 		boolean isBool = isBoolGetter(method);
-		boolean validName = (isBool ? method.getName()
-		    .startsWith(IS)
-		    : method.getName()
-		        .startsWith(GET));
+		boolean validName = (isBool ? method.getName().startsWith(IS) : method.getName().startsWith(GET));
 		boolean hasArguments = hasArguments(method);
 		boolean hasReturnType = hasReturnType(method);
 		return validName && hasReturnType && !hasArguments;
@@ -162,7 +169,8 @@ class ReflectionUtil {
 	}
 
 	static boolean isBool(Class<?> type) {
-		// isBool is used to determine if "is"-method should be used. This is only the case for primitive type.
+		// isBool is used to determine if "is"-method should be used. This is only the
+		// case for primitive type.
 		return type == Boolean.TYPE;
 	}
 
@@ -175,9 +183,11 @@ class ReflectionUtil {
 	}
 
 	/**
-	 * Returns the name of a property represented with either a getter or setter method.
+	 * Returns the name of a property represented with either a getter or setter
+	 * method.
 	 *
-	 * @param method The getter or setter method.
+	 * @param method
+	 *            The getter or setter method.
 	 * @return Returns the name of the property.
 	 */
 	static String toPropertyName(Method method) {
@@ -200,27 +210,36 @@ class ReflectionUtil {
 	}
 
 	/**
-	 * This method calls a method on the specified object. <b>This method takes into account, that the specified object
-	 * can also be a proxy instance.</b> In this case, the method to be called must be redefined with searching it on the
-	 * proxy. (Proxy instances are not classes of the type the method was declared in.)
+	 * This method calls a method on the specified object. <b>This method takes into
+	 * account, that the specified object can also be a proxy instance.</b> In this
+	 * case, the method to be called must be redefined with searching it on the
+	 * proxy. (Proxy instances are not classes of the type the method was declared
+	 * in.)
 	 *
-	 * @param method The method to be invoked
-	 * @param targetObject The target object or proxy instance.
-	 * @param args (Optional) Arguments to pass to the invoked method or <code>null</code> indicating no parameters.
+	 * @param method
+	 *            The method to be invoked
+	 * @param targetObject
+	 *            The target object or proxy instance.
+	 * @param args
+	 *            (Optional) Arguments to pass to the invoked method or
+	 *            <code>null</code> indicating no parameters.
 	 * @return Returns the return value of the method on demand.
-	 * @throws IllegalAccessException Thrown on any access error.
-	 * @throws InvocationTargetException Thrown on any invocation error.
-	 * @throws SecurityException Thrown if the reflective operation is not allowed
-	 * @throws NoSuchMethodException Thrown if the proxy instance does not provide the desired method.
+	 * @throws IllegalAccessException
+	 *             Thrown on any access error.
+	 * @throws InvocationTargetException
+	 *             Thrown on any invocation error.
+	 * @throws SecurityException
+	 *             Thrown if the reflective operation is not allowed
+	 * @throws NoSuchMethodException
+	 *             Thrown if the proxy instance does not provide the desired method.
 	 */
 	static Object invokeMethodProxySafe(Method method, Object targetObject, Object... args)
-	    throws IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
+			throws IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
 		Method effectiveMethod = method;
 		Class<?> clazz = targetObject.getClass();
 		if (Proxy.isProxyClass(clazz)) {
 			// schuettec - 08.02.2017 : Find the method on the specified proxy.
-			effectiveMethod = targetObject.getClass()
-			    .getMethod(method.getName(), method.getParameterTypes());
+			effectiveMethod = targetObject.getClass().getMethod(method.getName(), method.getParameterTypes());
 		}
 		if (args == null) {
 			return effectiveMethod.invoke(targetObject);
@@ -232,7 +251,8 @@ class ReflectionUtil {
 	/**
 	 * Creates a new instance of the specified type.
 	 *
-	 * @param type The type to instantiate
+	 * @param type
+	 *            The type to instantiate
 	 * @return Returns a new instance.
 	 */
 	static <D> D newInstance(Class<D> type) {

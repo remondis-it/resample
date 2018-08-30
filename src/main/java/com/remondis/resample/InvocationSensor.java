@@ -17,8 +17,8 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 
 /**
- * The {@link InvocationSensor} tracks get-method invocations on a proxy class and makes the invocation information
- * available to the {@link Mapper}.
+ * The {@link InvocationSensor} tracks get-method invocations on a proxy class
+ * and makes the invocation information available to the {@link Mapper}.
  *
  * @author schuettec
  */
@@ -42,7 +42,8 @@ class InvocationSensor<T> {
 					// schuettec - Then return an appropriate default value.
 					return nullOrDefaultValue(method.getReturnType());
 				} else if (isObjectMethod(method)) {
-					// schuettec - 08.02.2017 : Methods like toString, equals or hashcode are redirected to this invocation
+					// schuettec - 08.02.2017 : Methods like toString, equals or hashcode are
+					// redirected to this invocation
 					// handler.
 					return invokeMethodProxySafe(method, this, args);
 				} else {
@@ -75,8 +76,8 @@ class InvocationSensor<T> {
 	/**
 	 * Checks if there were any properties accessed by get calls.
 	 *
-	 * @return Returns <code>true</code> if there were at least one interaction with a property. Otherwise
-	 *         <code>false</code> is returned.
+	 * @return Returns <code>true</code> if there were at least one interaction with
+	 *         a property. Otherwise <code>false</code> is returned.
 	 */
 	boolean hasTrackedProperties() {
 		return !propertyNames.isEmpty();

@@ -20,8 +20,9 @@ public class Plant {
 
 	private ZonedDateTime validTo;
 
-	public Plant(Long id, Long plantIdPrevious, Long version, String description, ForeignOperatorInfo foreignOperatorInfo,
-	    Facility localOperatorInfo, ZonedDateTime validFrom, ZonedDateTime validTo) {
+	public Plant(Long id, Long plantIdPrevious, Long version, String description,
+			ForeignOperatorInfo foreignOperatorInfo, Facility localOperatorInfo, ZonedDateTime validFrom,
+			ZonedDateTime validTo) {
 		super();
 		this.id = id;
 		this.plantIdPrevious = plantIdPrevious;
