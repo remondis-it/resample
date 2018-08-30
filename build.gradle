@@ -24,7 +24,7 @@ apply plugin: 'maven-publish'
 apply plugin: "com.diffplug.gradle.spotless"
 apply plugin: "jacoco"
 
-group 'com.remondis'
+group 'com.remondis.renew'
 
 version PROJECT_VERSION
 
