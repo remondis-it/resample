@@ -45,10 +45,12 @@ public class DateSupplier {
 	public static Function<FieldInfo, ZonedDateTime> zonedDateTimeSupplier() {
 		return (info) -> {
 			if (info.getPropertyName()
+			    .toLowerCase()
 			    .contains("from")) {
 				return ZonedDateTime.now()
 				    .minus(1, ChronoUnit.DAYS);
 			} else if (info.getPropertyName()
+			    .toLowerCase()
 			    .contains("to")) {
 				return ZonedDateTime.now()
 				    .plus(1, ChronoUnit.DAYS);

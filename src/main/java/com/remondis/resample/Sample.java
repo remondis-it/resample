@@ -42,7 +42,7 @@ public class Sample<T> implements Supplier<T> {
 
 	private Map<PropertyDescriptor, Function<FieldInfo, ?>> fieldSettings = new Hashtable<>();
 
-	private boolean checkForNullFields;
+	private boolean checkForNullFields = true;
 
 	public Sample(Class<T> type) {
 		super();
@@ -84,10 +84,6 @@ public class Sample<T> implements Supplier<T> {
 	}
 
 	void addFieldSetting(PropertyDescriptor propertyDescriptor, Function<FieldInfo, ?> supplier) {
-		if (isPrimitive(propertyDescriptor.getPropertyType())) {
-			throw new IllegalArgumentException(
-			    "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
-		}
 		fieldSettings.put(propertyDescriptor, supplier);
 	}
 
