@@ -35,7 +35,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @param <T>
  */
-public class Sample<T> implements Supplier<T> {
+public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 	public static <T> Sample<T> of(Class<T> type) {
 		return new Sample<>(type);
 	}
@@ -61,7 +61,7 @@ public class Sample<T> implements Supplier<T> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void useApplicationContext(ApplicationContext context) {
+	public Sample<T> useApplicationContext(ApplicationContext context) {
 		requireNonNull(context, "Application context must not be null!");
 		Map<String, SampleSupplier> beansOfType = context.getBeansOfType(SampleSupplier.class);
 		this.appCtxProviders = new Hashtable<Class<?>, SampleSupplier<?>>();
@@ -72,6 +72,7 @@ public class Sample<T> implements Supplier<T> {
 			    appCtxProviders.putIfAbsent(supplier.getType(), supplier);
 		    });
 		this.context = context;
+		return this;
 	}
 
 	public <S> Sample<T> useSample(Sample<S> sample) {
@@ -112,6 +113,20 @@ public class Sample<T> implements Supplier<T> {
 		fieldSettings.put(propertyDescriptor, supplier);
 	}
 
+	public Class<T> getType() {
+		return type;
+	}
+
+	@Override
+	public T get() {
+		return newInstance();
+	}
+
+	@Override
+	public T newInstance(FieldInfo fieldInfo) {
+		return get();
+	}
+
 	public T newInstance() {
 		try {
 			Constructor<T> constructor = type.getConstructor();
@@ -125,10 +140,10 @@ public class Sample<T> implements Supplier<T> {
 			Set<PropertyDescriptor> hitByType = setAllValuesFromTypeSettingsExcludingFieldSettings(newInstance);
 			// Execute all the fieldConfigurations
 			Set<PropertyDescriptor> hitByField = setAllValuesFromFieldSettings(newInstance);
+			hitProperties.addAll(hitByAppContext);
 			hitProperties.addAll(hitByType);
 			hitProperties.addAll(hitByField);
 			denyNullFieldsOnDemand(hitProperties);
-
 			return newInstance;
 		} catch (SampleException e) {
 			throw e;
@@ -259,10 +274,6 @@ public class Sample<T> implements Supplier<T> {
 		}
 	}
 
-	Class<T> getType() {
-		return type;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName())
@@ -285,11 +296,6 @@ public class Sample<T> implements Supplier<T> {
 			        .append("\n");
 		    });
 		return b.toString();
-	}
-
-	@Override
-	public T get() {
-		return newInstance();
 	}
 
 }

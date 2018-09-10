@@ -4,13 +4,24 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.remondis.resample.FieldInfo;
 
 /**
- * Supplies {@link ZonedDateTime} instances.
+ * A collection of the most common suppliers.
  */
-public class DateSupplier {
+public class Suppliers {
+
+	/**
+	 * @return Returns a supplier of a sample enum value.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Function<FieldInfo, T> enumValueSupplier() {
+		return (fi) -> {
+			return (T) fi.getType().getEnumConstants()[0];
+		};
+	}
 
 	/**
 	 * @return Returns a period supplier that generates {@link ZonedDateTime}s:
@@ -54,4 +65,21 @@ public class DateSupplier {
 		};
 	}
 
+	/**
+	 * @return Returns a sample supplier returning empty strings.
+	 */
+	public static Supplier<String> emptyStringSupplier() {
+		return () -> {
+			return new String();
+		};
+	}
+
+	/**
+	 * @return Returning a sample supplier returning the field name as string.
+	 */
+	public static Function<FieldInfo, String> fieldNameStringSupplier() {
+		return (fi) -> {
+			return new String(fi.getPropertyName());
+		};
+	}
 }
