@@ -45,8 +45,10 @@ public class SampleException extends RuntimeException {
   }
 
   static SampleException autoSamplingFailed(PropertyDescriptor pd, Sample<?> autoSample, Exception e) {
-    return new SampleException(
-        String.format("Auto-sampling failed for property '%s' and configuration:\n%s", pd, autoSample), e);
+    return new SampleException(String.format("Auto-sampling failed for property '%s' ('%s') and configuration:\n%s",
+        pd.getName(), pd.getReadMethod()
+            .getName(),
+        autoSample), e);
   }
 
 }
