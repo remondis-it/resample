@@ -10,7 +10,7 @@ import com.remondis.resample.FunctionSupplier;
 
 @Component
 public class LocalDateSupplier extends FunctionSupplier<LocalDate> {
-	public LocalDateSupplier() {
-		super(LocalDate.class, localDateSupplier());
-	}
+  public LocalDateSupplier() {
+    super(LocalDate.class, localDateSupplier());
+  }
 }

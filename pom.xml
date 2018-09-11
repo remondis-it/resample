@@ -145,7 +145,7 @@
 			<plugin>
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
-				<version>2.7.2</version>
+				<version>2.7.5</version>
 				<executions>
 					<execution>
 						<phase>validate</phase>
@@ -156,7 +156,7 @@
 				</executions>
 				<configuration>
 					<lineEnding>LF</lineEnding>
-					<configFile>${sharedDirectory}/shared/formatter.xml</configFile>
+					<configFile>shared/eclipse-formatter-config.xml</configFile>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -189,21 +189,6 @@
 						<goals>
 							<goal>enforce</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>net.revelc.code.formatter</groupId>
-				<artifactId>formatter-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>validate</goal>
-						</goals>
-						<configuration>
-							<lineEnding>LF</lineEnding>
-							<configFile>${project.basedir}/shared/eclipse-formatter/eclipse-formatter-config.xml</configFile>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>

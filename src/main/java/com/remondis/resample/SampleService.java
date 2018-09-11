@@ -1,7 +1,7 @@
 package com.remondis.resample;
 
+import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
-import static com.remondis.resample.supplier.Suppliers.genericEnumValueSupplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,22 +17,23 @@ import com.remondis.resample.supplier.ZonedDateTimeSupplier;
 })
 public class SampleService {
 
-	private ApplicationContext ctx;
+  private ApplicationContext ctx;
 
-	@Autowired
-	public SampleService(ApplicationContext ctx) {
-		super();
-		this.ctx = ctx;
-	}
+  @Autowired
+  public SampleService(ApplicationContext ctx) {
+    super();
+    this.ctx = ctx;
+  }
 
-	public <T> Sample<T> of(Class<T> type) {
-		return Sample.of(type)
-		    .checkForNullFields()
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class)
-		    .use(genericEnumValueSupplier())
-		    .forType(Enum.class)
-		    .useApplicationContext(ctx);
-	}
+  public <T> Sample<T> of(Class<T> type) {
+    return Sample.of(type)
+        .checkForNullFields()
+        .use(fieldNameStringSupplier())
+        .forType(String.class)
+        .useForEnum(enumValueSupplier())
+        .useApplicationContext(ctx)
+        .useAutoSampling();
+
+  }
 
 }

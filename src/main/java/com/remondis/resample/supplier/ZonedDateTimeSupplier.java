@@ -10,7 +10,7 @@ import com.remondis.resample.FunctionSupplier;
 
 @Component
 public class ZonedDateTimeSupplier extends FunctionSupplier<ZonedDateTime> {
-	public ZonedDateTimeSupplier() {
-		super(ZonedDateTime.class, zonedDateTimeSupplier());
-	}
+  public ZonedDateTimeSupplier() {
+    super(ZonedDateTime.class, zonedDateTimeSupplier());
+  }
 }

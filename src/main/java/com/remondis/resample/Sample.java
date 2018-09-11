@@ -36,231 +36,353 @@ import org.springframework.context.ApplicationContext;
  * @param <T>
  */
 public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
-	public static <T> Sample<T> of(Class<T> type) {
-		return new Sample<>(type);
-	}
+  public static <T> Sample<T> of(Class<T> type) {
+    return new Sample<>(type);
+  }
 
-	private Class<T> type;
+  private Class<T> type;
 
-	private Map<Class<?>, Function<FieldInfo, ?>> typeSettings = new Hashtable<>();
+  private Map<Class<?>, Function<FieldInfo, ?>> typeSettings = new Hashtable<>();
 
-	private Map<PropertyDescriptor, Function<FieldInfo, ?>> fieldSettings = new Hashtable<>();
+  private Map<PropertyDescriptor, Function<FieldInfo, ?>> fieldSettings = new Hashtable<>();
 
-	private boolean checkForNullFields = true;
+  private boolean checkForNullFields = true;
 
-	private ApplicationContext context;
-	private Hashtable<Class<?>, SampleSupplier<?>> appCtxProviders;
+  private ApplicationContext context;
+  private Hashtable<Class<?>, SampleSupplier<?>> appCtxProviders;
 
-	public Sample(Class<T> type) {
-		super();
-		this.type = type;
-	}
+  private Function<FieldInfo, Enum<?>> enumValueSupplier;
 
-	private boolean hasApplicationContext() {
-		return nonNull(context);
-	}
+  private boolean useAutoSampling;
 
-	@SuppressWarnings("rawtypes")
-	public Sample<T> useApplicationContext(ApplicationContext context) {
-		requireNonNull(context, "Application context must not be null!");
-		Map<String, SampleSupplier> beansOfType = context.getBeansOfType(SampleSupplier.class);
-		this.appCtxProviders = new Hashtable<Class<?>, SampleSupplier<?>>();
-		beansOfType.entrySet().stream().forEach(entry -> {
-			SampleSupplier supplier = entry.getValue();
-			appCtxProviders.putIfAbsent(supplier.getType(), supplier);
-		});
-		this.context = context;
-		return this;
-	}
+  public Sample(Class<T> type) {
+    super();
+    this.type = type;
+  }
 
-	public <S> Sample<T> useSample(Sample<S> sample) {
-		use((Supplier<S>) sample).forType(sample.getType());
-		return this;
-	}
+  private boolean hasApplicationContext() {
+    return nonNull(context);
+  }
 
-	public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
-		return use(fieldInfo -> {
-			return supplier.get();
-		});
-	}
+  @SuppressWarnings("rawtypes")
+  public Sample<T> useApplicationContext(ApplicationContext context) {
+    requireNonNull(context, "Application context must not be null!");
+    Map<String, SampleSupplier> beansOfType = context.getBeansOfType(SampleSupplier.class);
+    this.appCtxProviders = new Hashtable<Class<?>, SampleSupplier<?>>();
+    beansOfType.entrySet()
+        .stream()
+        .forEach(entry -> {
+          SampleSupplier supplier = entry.getValue();
+          appCtxProviders.putIfAbsent(supplier.getType(), supplier);
+        });
+    this.context = context;
+    return this;
+  }
 
-	public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
-		requireNonNull(function, "Function may not be null.");
-		return new SettingBuilder<T, S>(this, function);
-	}
+  public Sample<T> useAutoSampling() {
+    this.useAutoSampling = true;
+    return this;
+  }
 
-	public Sample<T> checkForNullFields() {
-		this.checkForNullFields = true;
-		return this;
-	}
+  public <S> Sample<T> useSample(Sample<S> sample) {
+    use((Supplier<S>) sample).forType(sample.getType());
+    return this;
+  }
 
-	public Sample<T> ignoreNullFields() {
-		this.checkForNullFields = false;
-		return this;
-	}
+  public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
+    return use(fieldInfo -> {
+      return supplier.get();
+    });
+  }
 
-	<S> void addTypeSetting(Function<FieldInfo, S> supplier, Class<? super S> type) {
-		if (isPrimitive(type)) {
-			throw new IllegalArgumentException(
-					"Type settings are not allowed for primitive types. Please specify primitive types on fields.");
-		}
-		this.typeSettings.put(type, supplier);
-	}
+  public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
+    requireNonNull(function, "Function may not be null.");
+    return new SettingBuilder<T, S>(this, function);
+  }
 
-	void addFieldSetting(PropertyDescriptor propertyDescriptor, Function<FieldInfo, ?> supplier) {
-		fieldSettings.put(propertyDescriptor, supplier);
-	}
+  public Sample<T> useForEnum(Function<FieldInfo, Enum<?>> function) {
+    this.enumValueSupplier = function;
+    return this;
+  }
 
-	public Class<T> getType() {
-		return type;
-	}
+  public Sample<T> checkForNullFields() {
+    this.checkForNullFields = true;
+    return this;
+  }
 
-	@Override
-	public T get() {
-		return newInstance();
-	}
+  public Sample<T> ignoreNullFields() {
+    this.checkForNullFields = false;
+    return this;
+  }
 
-	@Override
-	public T newInstance(FieldInfo fieldInfo) {
-		return get();
-	}
+  <S> void addTypeSetting(Function<FieldInfo, S> supplier, Class<? super S> type) {
+    if (isPrimitive(type)) {
+      throw new IllegalArgumentException(
+          "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
+    }
+    this.typeSettings.put(type, supplier);
+  }
 
-	public T newInstance() {
-		try {
-			Constructor<T> constructor = type.getConstructor();
-			T newInstance = constructor.newInstance();
-			// Set all primitive properties
-			Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
-			// Execute all value providers available in Application Context
-			Set<PropertyDescriptor> hitByAppContext = setAllValuesFromApplicationContextExcludingFieldSettings(
-					newInstance);
-			// Execute all type registered factories but skip the properties in the set of
-			// field configurations.
-			Set<PropertyDescriptor> hitByType = setAllValuesFromTypeSettingsExcludingFieldSettings(newInstance);
-			// Execute all the fieldConfigurations
-			Set<PropertyDescriptor> hitByField = setAllValuesFromFieldSettings(newInstance);
-			hitProperties.addAll(hitByAppContext);
-			hitProperties.addAll(hitByType);
-			hitProperties.addAll(hitByField);
-			denyNullFieldsOnDemand(hitProperties);
-			return newInstance;
-		} catch (SampleException e) {
-			throw e;
-		} catch (Exception e) {
-			throw ReflectionException.newInstanceFailed(type, e);
-		}
-	}
+  void addFieldSetting(PropertyDescriptor propertyDescriptor, Function<FieldInfo, ?> supplier) {
+    fieldSettings.put(propertyDescriptor, supplier);
+  }
 
-	private void denyNullFieldsOnDemand(Set<PropertyDescriptor> hitProperties) {
-		if (checkForNullFields) {
-			Set<PropertyDescriptor> properties = Properties.getProperties(type);
-			properties.removeAll(hitProperties);
-			if (!properties.isEmpty()) {
-				String message = properties.stream().map(PropertyDescriptor::getName)
-						.collect(() -> new StringBuilder(
-								"The following properties were not covered by the sample generator:\nFor class '")
-										.append(type.getName()).append("'\n"),
-								(acc, str) -> acc.append("- ").append(str).append("\n"),
-								(sb1, sb2) -> sb1.append(sb2.toString()))
-						.toString();
-				throw new SampleException(message);
-			}
-		}
-	}
+  public Class<T> getType() {
+    return type;
+  }
 
-	private Set<PropertyDescriptor> setAllValuesForPrimitiveFields(T newInstance) {
-		return Properties.getProperties(type).stream().filter(pd -> {
-			return isPrimitive(pd.getPropertyType());
-		}).map(pd -> {
-			setValueFromPrimitive(newInstance, pd);
-			return pd;
-		}).collect(Collectors.toSet());
-	}
+  @Override
+  public T get() {
+    return newInstance();
+  }
 
-	private Set<PropertyDescriptor> setAllValuesFromFieldSettings(T newInstance) {
-		return fieldSettings.entrySet().stream().map(e -> {
-			PropertyDescriptor pd = e.getKey();
-			setValueFromFieldSetting(newInstance, pd);
-			return pd;
-		}).collect(Collectors.toSet());
-	}
+  @Override
+  public T newInstance(FieldInfo fieldInfo) {
+    return get();
+  }
 
-	private Set<PropertyDescriptor> setAllValuesFromApplicationContextExcludingFieldSettings(T newInstance) {
-		if (hasApplicationContext()) {
-			return Properties.getProperties(type).stream().filter(pd -> {
-				return !fieldSettings.containsKey(pd);
-			}).filter(pd -> appCtxProviders.containsKey(pd.getPropertyType())).map(pd -> {
-				setValueFromApplicationContext(newInstance, pd);
-				return pd;
-			}).collect(Collectors.toSet());
-		} else {
-			return Collections.emptySet();
-		}
-	}
+  public T newInstance() {
+    try {
+      T newInstance = createNewInstance(type);
+      // Set all primitive properties
+      Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
+      // Set all enum values
+      Set<PropertyDescriptor> hitEnums = setAllEnumValues(newInstance);
+      // Execute all value providers available in Application Context
+      Set<PropertyDescriptor> hitByAppContext = setAllValuesByApplicationContextExcludingFieldSettings(newInstance);
+      // Execute all type registered factories but skip the properties in the set of
+      // field configurations.
+      Set<PropertyDescriptor> hitByType = setAllValuesByTypeSettingsExcludingFieldSettings(newInstance);
+      // Execute all the fieldConfigurations
+      Set<PropertyDescriptor> hitByField = setAllValuesByFieldSettings(newInstance);
+      hitProperties.addAll(hitByAppContext);
+      hitProperties.addAll(hitEnums);
+      hitProperties.addAll(hitByType);
+      hitProperties.addAll(hitByField);
 
-	private Set<PropertyDescriptor> setAllValuesFromTypeSettingsExcludingFieldSettings(T newInstance) {
-		return Properties.getProperties(type).stream().filter(pd -> {
-			return !fieldSettings.containsKey(pd);
-		}).filter(pd -> typeSettings.containsKey(pd.getPropertyType())).map(pd -> {
-			setValueFromTypeSetting(newInstance, pd);
-			return pd;
-		}).collect(Collectors.toSet());
-	}
+      Set<PropertyDescriptor> hitByAutoSampling = setAllValuesByAutoSampling(hitProperties, newInstance);
+      hitProperties.addAll(hitByAutoSampling);
 
-	private void setValueFromPrimitive(T newInstance, PropertyDescriptor pd) {
-		writeOrFail(pd, newInstance, defaultValue(pd.getPropertyType()));
-	}
+      denyNullFieldsOnDemand(hitProperties);
+      return newInstance;
+    } catch (SampleException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ReflectionException.newInstanceFailed(type, e);
+    }
+  }
 
-	private void setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
-		Class<?> propertyType = pd.getPropertyType();
-		SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
-		setValue(pd, newInstance, supplier::newInstance);
-	}
+  private Set<PropertyDescriptor> setAllValuesByAutoSampling(Set<PropertyDescriptor> hitProperties, T newInstance) {
+    if (useAutoSampling) {
+      Set<PropertyDescriptor> notHitFields = getNotHitFields(hitProperties);
+      Set<PropertyDescriptor> hitFields = notHitFields.stream()
+          .filter(pd -> setValueByAutoSampling(pd, newInstance))
+          .collect(Collectors.toSet());
+      return hitFields;
+    } else {
+      return Collections.emptySet();
+    }
+  }
 
-	private void setValueFromTypeSetting(T newInstance, PropertyDescriptor pd) {
-		Class<?> propertyType = pd.getPropertyType();
-		Function<FieldInfo, ?> supplier = typeSettings.get(propertyType);
-		setValue(pd, newInstance, supplier);
-	}
+  private boolean setValueByAutoSampling(PropertyDescriptor pd, T newInstance) {
+    Class<?> type = pd.getPropertyType();
+    Sample<?> autoSample = Sample.of(type);
+    autoSample.typeSettings = new Hashtable<>(this.typeSettings);
+    autoSample.checkForNullFields = this.checkForNullFields;
+    autoSample.context = this.context;
+    if (nonNull(appCtxProviders)) {
+      autoSample.appCtxProviders = new Hashtable(this.appCtxProviders);
+    }
+    autoSample.enumValueSupplier = this.enumValueSupplier;
+    autoSample.useAutoSampling = this.useAutoSampling;
+    try {
+      setValue(pd, newInstance, autoSample::newInstance);
+    } catch (Exception e) {
+      throw SampleException.autoSamplingFailed(pd, autoSample, e);
+    }
+    return true;
+  }
 
-	private void setValueFromFieldSetting(T newInstance, PropertyDescriptor pd) {
-		Function<FieldInfo, ?> supplier = fieldSettings.get(pd);
-		setValue(pd, newInstance, supplier);
-	}
+  private static <T> T createNewInstance(Class<T> type)
+      throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    Constructor<T> constructor = type.getConstructor();
+    T newInstance = constructor.newInstance();
+    return newInstance;
+  }
 
-	private void setValue(PropertyDescriptor pd, T newInstance, Function<FieldInfo, ?> supplier) {
-		FieldInfo fieldInfo = new FieldInfo(pd.getName(), pd.getPropertyType());
-		Object value;
-		try {
-			value = supplier.apply(fieldInfo);
-		} catch (Throwable e) {
-			throw valueSupplierException(e);
-		}
-		writeOrFail(pd, newInstance, value);
-	}
+  private Set<PropertyDescriptor> setAllEnumValues(T newInstance) {
+    if (nonNull(enumValueSupplier)) {
+      return Properties.getProperties(type)
+          .stream()
+          .filter(pd -> {
+            return pd.getPropertyType()
+                .isEnum();
+          })
+          .filter(pd -> {
+            return !fieldSettings.containsKey(pd);
+          })
+          .filter(pd -> {
+            return !fieldSettings.containsKey(pd);
+          })
+          .map(pd -> {
+            setValue(pd, newInstance, enumValueSupplier);
+            return pd;
+          })
+          .collect(Collectors.toSet());
+    } else {
+      return Collections.emptySet();
+    }
+  }
 
-	void writeOrFail(PropertyDescriptor property, Object targetInstance, Object value) {
-		try {
-			Method writeMethod = property.getWriteMethod();
-			writeMethod.setAccessible(true);
-			writeMethod.invoke(targetInstance, value);
-		} catch (InvocationTargetException e) {
-			throw ReflectionException.invocationTarget(property, e);
-		} catch (Exception e) {
-			throw ReflectionException.invocationFailed(property, e);
-		}
-	}
+  private void denyNullFieldsOnDemand(Set<PropertyDescriptor> hitProperties) {
+    if (checkForNullFields) {
+      Set<PropertyDescriptor> properties = getNotHitFields(hitProperties);
+      if (!properties.isEmpty()) {
+        String message = properties.stream()
+            .map(PropertyDescriptor::getName)
+            .collect(
+                () -> new StringBuilder(
+                    "The following properties were not covered by the sample generator:\nFor class '")
+                        .append(type.getName())
+                        .append("'\n"),
+                (acc, str) -> acc.append("- ")
+                    .append(str)
+                    .append("\n"),
+                (sb1, sb2) -> sb1.append(sb2.toString()))
+            .toString();
+        throw new SampleException(message);
+      }
+    }
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName()).append("'\n");
-		fieldSettings.entrySet().stream().forEach(e -> {
-			b.append("- applying value factory for field '").append(e.getKey().getReadMethod().getName()).append("'\n");
-		});
-		typeSettings.entrySet().stream().forEach(e -> {
-			b.append("- applying value factory producing ").append(e.getKey().getName()).append("\n");
-		});
-		return b.toString();
-	}
+  private Set<PropertyDescriptor> getNotHitFields(Set<PropertyDescriptor> hitProperties) {
+    Set<PropertyDescriptor> properties = Properties.getProperties(type);
+    properties.removeAll(hitProperties);
+    return properties;
+  }
+
+  private Set<PropertyDescriptor> setAllValuesForPrimitiveFields(T newInstance) {
+    return Properties.getProperties(type)
+        .stream()
+        .filter(pd -> {
+          return isPrimitive(pd.getPropertyType());
+        })
+        .map(pd -> {
+          setValueFromPrimitive(newInstance, pd);
+          return pd;
+        })
+        .collect(Collectors.toSet());
+  }
+
+  private Set<PropertyDescriptor> setAllValuesByFieldSettings(T newInstance) {
+    return fieldSettings.entrySet()
+        .stream()
+        .map(e -> {
+          PropertyDescriptor pd = e.getKey();
+          setValueFromFieldSetting(newInstance, pd);
+          return pd;
+        })
+        .collect(Collectors.toSet());
+  }
+
+  private Set<PropertyDescriptor> setAllValuesByApplicationContextExcludingFieldSettings(T newInstance) {
+    if (hasApplicationContext()) {
+      return Properties.getProperties(type)
+          .stream()
+          .filter(pd -> {
+            return !fieldSettings.containsKey(pd);
+          })
+          .filter(pd -> appCtxProviders.containsKey(pd.getPropertyType()))
+          .map(pd -> {
+            setValueFromApplicationContext(newInstance, pd);
+            return pd;
+          })
+          .collect(Collectors.toSet());
+    } else {
+      return Collections.emptySet();
+    }
+  }
+
+  private Set<PropertyDescriptor> setAllValuesByTypeSettingsExcludingFieldSettings(T newInstance) {
+    return Properties.getProperties(type)
+        .stream()
+        .filter(pd -> {
+          return !fieldSettings.containsKey(pd);
+        })
+        .filter(pd -> typeSettings.containsKey(pd.getPropertyType()))
+        .map(pd -> {
+          setValueFromTypeSetting(newInstance, pd);
+          return pd;
+        })
+        .collect(Collectors.toSet());
+  }
+
+  private void setValueFromPrimitive(T newInstance, PropertyDescriptor pd) {
+    writeOrFail(pd, newInstance, defaultValue(pd.getPropertyType()));
+  }
+
+  private void setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
+    Class<?> propertyType = pd.getPropertyType();
+    SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
+    setValue(pd, newInstance, supplier::newInstance);
+  }
+
+  private void setValueFromTypeSetting(T newInstance, PropertyDescriptor pd) {
+    Class<?> propertyType = pd.getPropertyType();
+    Function<FieldInfo, ?> supplier = typeSettings.get(propertyType);
+    setValue(pd, newInstance, supplier);
+  }
+
+  private void setValueFromFieldSetting(T newInstance, PropertyDescriptor pd) {
+    Function<FieldInfo, ?> supplier = fieldSettings.get(pd);
+    setValue(pd, newInstance, supplier);
+  }
+
+  private void setValue(PropertyDescriptor pd, T newInstance, Function<FieldInfo, ?> supplier) {
+    FieldInfo fieldInfo = new FieldInfo(pd.getName(), pd.getPropertyType());
+    Object value;
+    try {
+      value = supplier.apply(fieldInfo);
+    } catch (Throwable e) {
+      throw valueSupplierException(e);
+    }
+    writeOrFail(pd, newInstance, value);
+  }
+
+  void writeOrFail(PropertyDescriptor property, Object targetInstance, Object value) {
+    try {
+      Method writeMethod = property.getWriteMethod();
+      writeMethod.setAccessible(true);
+      writeMethod.invoke(targetInstance, value);
+    } catch (InvocationTargetException e) {
+      throw ReflectionException.invocationTarget(property, e);
+    } catch (Exception e) {
+      throw ReflectionException.invocationFailed(property, e);
+    }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName())
+        .append("'\n");
+    fieldSettings.entrySet()
+        .stream()
+        .forEach(e -> {
+          b.append("- applying value factory for field '")
+              .append(e.getKey()
+                  .getReadMethod()
+                  .getName())
+              .append("'\n");
+        });
+    typeSettings.entrySet()
+        .stream()
+        .forEach(e -> {
+          b.append("- applying value factory producing ")
+              .append(e.getKey()
+                  .getName())
+              .append("\n");
+        });
+    return b.toString();
+  }
 
 }

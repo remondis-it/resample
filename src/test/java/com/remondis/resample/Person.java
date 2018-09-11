@@ -2,59 +2,71 @@ package com.remondis.resample;
 
 import java.time.LocalDate;
 
+import com.remondis.example.Gender;
+
 public class Person {
 
-	private String name;
-	private String forname;
-	private int age;
-	private LocalDate brithday;
+  private String name;
+  private String forname;
+  private int age;
+  private LocalDate brithday;
+  private Gender gender;
 
-	public Person() {
-		super();
-	}
+  public Person() {
+    super();
+  }
 
-	public Person(String name, String forname, int age, LocalDate brithday) {
-		super();
-		this.name = name;
-		this.forname = forname;
-		this.age = age;
-		this.brithday = brithday;
-	}
+  public Person(String name, String forname, int age, LocalDate brithday, Gender gender) {
+    super();
+    this.name = name;
+    this.forname = forname;
+    this.age = age;
+    this.brithday = brithday;
+    this.gender = gender;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public Gender getGender() {
+    return gender;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setGender(Gender gender) {
+    this.gender = gender;
+  }
 
-	public String getForname() {
-		return forname;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setForname(String forname) {
-		this.forname = forname;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public int getAge() {
-		return age;
-	}
+  public String getForname() {
+    return forname;
+  }
 
-	public void setAge(int age) {
-		this.age = age;
-	}
+  public void setForname(String forname) {
+    this.forname = forname;
+  }
 
-	public LocalDate getBrithday() {
-		return brithday;
-	}
+  public int getAge() {
+    return age;
+  }
 
-	public void setBrithday(LocalDate brithday) {
-		this.brithday = brithday;
-	}
+  public void setAge(int age) {
+    this.age = age;
+  }
 
-	@Override
-	public String toString() {
-		return "Person [name=" + name + ", forname=" + forname + ", age=" + age + ", brithday=" + brithday + "]";
-	}
+  public LocalDate getBrithday() {
+    return brithday;
+  }
+
+  public void setBrithday(LocalDate brithday) {
+    this.brithday = brithday;
+  }
+
+  @Override
+  public String toString() {
+    return "Person [name=" + name + ", forname=" + forname + ", age=" + age + ", brithday=" + brithday + "]";
+  }
 }
