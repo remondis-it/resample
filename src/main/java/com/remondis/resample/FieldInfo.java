@@ -6,21 +6,21 @@ package com.remondis.resample;
  */
 public class FieldInfo {
 
-	private String propertyName;
-	private Class<?> type;
+  private String propertyName;
+  private Class<?> type;
 
-	FieldInfo(String propertyName, Class<?> type) {
-		super();
-		this.propertyName = propertyName;
-		this.type = type;
-	}
+  FieldInfo(String propertyName, Class<?> type) {
+    super();
+    this.propertyName = propertyName;
+    this.type = type;
+  }
 
-	public String getPropertyName() {
-		return propertyName;
-	}
+  public String getPropertyName() {
+    return propertyName;
+  }
 
-	public Class<?> getType() {
-		return type;
-	}
+  public Class<?> getType() {
+    return type;
+  }
 
 }

@@ -3,6 +3,9 @@ package com.remondis.resample.supplier;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -47,6 +50,39 @@ public class Suppliers {
         return LocalDate.now();
       }
     };
+  }
+
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' yesterday is returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' tomorrow is returned as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static Function<FieldInfo, Date> dateSupplier() {
+    final Calendar cal = Calendar.getInstance();
+    return (info) -> {
+      if (info.getPropertyName()
+          .contains("from")) {
+        cal.add(Calendar.DATE, -1);
+        return new Date(cal.getTime()
+            .getTime());
+      } else if (info.getPropertyName()
+          .contains("to")) {
+        cal.add(Calendar.DATE, 1);
+        return new Date(cal.getTime()
+            .getTime());
+      } else {
+        return new Date(cal.getTime()
+            .getTime());
+      }
+    };
+  }
+
+  public static Function<FieldInfo, TimeZone> timeZoneSupplier() {
+    return fi -> TimeZone.getTimeZone("Europe/Berlin");
   }
 
   /**

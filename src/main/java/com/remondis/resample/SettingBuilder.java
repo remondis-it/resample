@@ -6,6 +6,7 @@ import static com.remondis.resample.SampleException.zeroInteractions;
 import static java.util.Objects.requireNonNull;
 
 import java.beans.PropertyDescriptor;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +45,29 @@ public class SettingBuilder<T, S> {
       // find the property descriptor or fail with an exception
       PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName);
       resample.addFieldSetting(pd, supplier);
+    } else {
+      throw zeroInteractions();
+    }
+    return resample;
+  }
+
+  public Sample<T> forFieldCollection(TypedSelector<Collection<S>, T> fieldSelector) {
+    requireNonNull(fieldSelector, "Type may not be null.");
+    Class<T> sensorType = resample.getType();
+    InvocationSensor<T> invocationSensor = new InvocationSensor<T>(sensorType);
+    T sensor = invocationSensor.getSensor();
+    fieldSelector.selectField(sensor);
+
+    if (invocationSensor.hasTrackedProperties()) {
+      // ...make sure it was exactly one property interaction
+      List<String> trackedPropertyNames = invocationSensor.getTrackedPropertyNames();
+      denyMultipleInteractions(trackedPropertyNames);
+      // get the property name
+      String propertyName = trackedPropertyNames.get(0);
+      // find the property descriptor or fail with an exception
+      PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName);
+      Function<FieldInfo, Collection<S>> wrapper = new CollectionSupplierWrapper<>(pd.getPropertyType(), supplier);
+      resample.addFieldSetting(pd, wrapper);
     } else {
       throw zeroInteractions();
     }
