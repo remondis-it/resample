@@ -10,6 +10,12 @@ public class ListDto {
   private List<Gender> listOfEnumValues;
   private Set<Gender> setOfEnumValues;
 
+  private Set<Long> setOfLongs;
+
+  private Set<String> setOfStrings;
+
+  private Set<Dummy> setOfDummies;
+
   public ListDto() {
     super();
   }
@@ -28,6 +34,30 @@ public class ListDto {
 
   public void setSetOfEnumValues(Set<Gender> setOfEnumValues) {
     this.setOfEnumValues = setOfEnumValues;
+  }
+
+  public Set<Long> getSetOfLongs() {
+    return setOfLongs;
+  }
+
+  public void setSetOfLongs(Set<Long> setOfLongs) {
+    this.setOfLongs = setOfLongs;
+  }
+
+  public Set<String> getSetOfStrings() {
+    return setOfStrings;
+  }
+
+  public void setSetOfStrings(Set<String> setOfStrings) {
+    this.setOfStrings = setOfStrings;
+  }
+
+  public Set<Dummy> getSetOfDummies() {
+    return setOfDummies;
+  }
+
+  public void setSetOfDummies(Set<Dummy> setOfDummies) {
+    this.setOfDummies = setOfDummies;
   }
 
 }

@@ -1,8 +1,13 @@
 package com.remondis.resample;
 
 import static com.remondis.resample.ReflectionUtil.defaultValue;
+import static com.remondis.resample.ReflectionUtil.getCollectionType;
+import static com.remondis.resample.ReflectionUtil.getCollector;
+import static com.remondis.resample.ReflectionUtil.isCollection;
 import static com.remondis.resample.ReflectionUtil.isPrimitive;
+import static com.remondis.resample.ReflectionUtil.isPrimitiveCollection;
 import static com.remondis.resample.SampleException.valueSupplierException;
+import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
@@ -185,7 +190,13 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   private boolean setValueByAutoSampling(PropertyDescriptor pd, T newInstance) {
-    Class<?> type = pd.getPropertyType();
+    Class<?> type = null;
+    if (isCollection(pd)) {
+      type = getCollectionType(pd);
+    } else {
+      type = pd.getPropertyType();
+    }
+
     Sample<?> autoSample = Sample.of(type);
     autoSample.typeSettings = new Hashtable<>(this.typeSettings);
     autoSample.checkForNullFields = this.checkForNullFields;
@@ -195,12 +206,21 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     }
     autoSample.enumValueSupplier = this.enumValueSupplier;
     autoSample.useAutoSampling = this.useAutoSampling;
+
+    Function<FieldInfo, ?> supplier = null;
+    if (isCollection(pd)) {
+      supplier = wrapInList(pd, autoSample::newInstance);
+    } else {
+      supplier = autoSample::newInstance;
+    }
+
     try {
-      setValue(pd, newInstance, autoSample::newInstance);
+      setValue(pd, newInstance, supplier);
     } catch (Exception e) {
       throw SampleException.autoSamplingFailed(pd, autoSample, e);
     }
     return true;
+
   }
 
   private static <T> T createNewInstance(Class<T> type)
@@ -215,8 +235,8 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       return Properties.getProperties(type)
           .stream()
           .filter(pd -> {
-            return pd.getPropertyType()
-                .isEnum();
+            Class<?> propertyType = pd.getPropertyType();
+            return propertyType.isEnum() || (isCollection(propertyType) && getCollectionType(pd).isEnum());
           })
           .filter(pd -> {
             return !fieldSettings.containsKey(pd);
@@ -225,13 +245,26 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
             return !fieldSettings.containsKey(pd);
           })
           .map(pd -> {
-            setValue(pd, newInstance, enumValueSupplier);
+            if (isCollection(pd.getPropertyType())) {
+              setValue(pd, newInstance, wrapInList(pd, enumValueSupplier));
+            } else {
+              setValue(pd, newInstance, enumValueSupplier);
+            }
             return pd;
           })
           .collect(Collectors.toSet());
     } else {
       return Collections.emptySet();
     }
+  }
+
+  private Function<FieldInfo, ?> wrapInList(PropertyDescriptor pd, Function<FieldInfo, ?> supplier) {
+    return (fi) -> {
+      Class<?> collectionType = getCollectionType(pd);
+      return asList(supplier.apply(new FieldInfo(pd.getName(), collectionType))).stream()
+          .collect(getCollector(pd.getPropertyType()));
+
+    };
   }
 
   private void denyNullFieldsOnDemand(Set<PropertyDescriptor> hitProperties) {
@@ -265,10 +298,19 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return Properties.getProperties(type)
         .stream()
         .filter(pd -> {
-          return isPrimitive(pd.getPropertyType());
+          return isPrimitive(pd.getPropertyType()) || isPrimitiveCollection(pd);
         })
         .map(pd -> {
-          setValueFromPrimitive(newInstance, pd);
+          Class<?> propertyType = pd.getPropertyType();
+          if (isPrimitiveCollection(pd)) {
+            Class<?> collectionType = getCollectionType(pd);
+            @SuppressWarnings("unchecked")
+            Object valueToSet = asList(defaultValue(collectionType)).stream()
+                .collect(getCollector(propertyType));
+            writeOrFail(pd, newInstance, valueToSet);
+          } else {
+            writeOrFail(pd, newInstance, defaultValue(propertyType));
+          }
           return pd;
         })
         .collect(Collectors.toSet());
@@ -292,7 +334,13 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
           .filter(pd -> {
             return !fieldSettings.containsKey(pd);
           })
-          .filter(pd -> appCtxProviders.containsKey(pd.getPropertyType()))
+          .filter(pd -> {
+            if (isCollection(pd)) {
+              return appCtxProviders.containsKey(getCollectionType(pd));
+            } else {
+              return appCtxProviders.containsKey(pd.getPropertyType());
+            }
+          })
           .map(pd -> {
             setValueFromApplicationContext(newInstance, pd);
             return pd;
@@ -309,7 +357,13 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
         .filter(pd -> {
           return !fieldSettings.containsKey(pd);
         })
-        .filter(pd -> typeSettings.containsKey(pd.getPropertyType()))
+        .filter(pd -> {
+          if (isCollection(pd)) {
+            return typeSettings.containsKey(getCollectionType(pd));
+          } else {
+            return typeSettings.containsKey(pd.getPropertyType());
+          }
+        })
         .map(pd -> {
           setValueFromTypeSetting(newInstance, pd);
           return pd;
@@ -317,20 +371,29 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
         .collect(Collectors.toSet());
   }
 
-  private void setValueFromPrimitive(T newInstance, PropertyDescriptor pd) {
-    writeOrFail(pd, newInstance, defaultValue(pd.getPropertyType()));
-  }
-
   private void setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
-    Class<?> propertyType = pd.getPropertyType();
-    SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
-    setValue(pd, newInstance, supplier::newInstance);
+    if (isCollection(pd)) {
+      Class<?> propertyType = getCollectionType(pd);
+      SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
+      setValue(pd, newInstance, wrapInList(pd, supplier::newInstance));
+    } else {
+      Class<?> propertyType = pd.getPropertyType();
+      SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
+      setValue(pd, newInstance, supplier::newInstance);
+    }
   }
 
   private void setValueFromTypeSetting(T newInstance, PropertyDescriptor pd) {
-    Class<?> propertyType = pd.getPropertyType();
-    Function<FieldInfo, ?> supplier = typeSettings.get(propertyType);
-    setValue(pd, newInstance, supplier);
+    if (isCollection(pd)) {
+      Class<?> propertyType = getCollectionType(pd);
+      Function<FieldInfo, ?> supplier = typeSettings.get(propertyType);
+      setValue(pd, newInstance, wrapInList(pd, supplier));
+    } else {
+      Class<?> propertyType = pd.getPropertyType();
+      Function<FieldInfo, ?> supplier = typeSettings.get(propertyType);
+      setValue(pd, newInstance, supplier);
+    }
+
   }
 
   private void setValueFromFieldSetting(T newInstance, PropertyDescriptor pd) {
@@ -346,6 +409,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     } catch (Throwable e) {
       throw valueSupplierException(e);
     }
+
     writeOrFail(pd, newInstance, value);
   }
 

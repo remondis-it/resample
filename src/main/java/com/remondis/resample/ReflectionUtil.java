@@ -1,5 +1,10 @@
 package com.remondis.resample;
 
+import static com.remondis.resample.ReflectionException.multipleInteractions;
+import static com.remondis.resample.ReflectionException.zeroInteractions;
+import static com.remondis.resample.SampleException.notAProperty;
+import static java.util.Objects.requireNonNull;
+
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -94,16 +100,80 @@ class ReflectionUtil {
     return DEFAULT_VALUES.containsKey(type);
   }
 
+  public static boolean isPrimitiveCollection(PropertyDescriptor pd) {
+    return ReflectionUtil.isCollection(pd.getPropertyType()) && isPrimitive(getCollectionType(pd));
+  }
+
   public static Class<?> getCollectionType(PropertyDescriptor pd) {
     boolean isCollection = isCollection(pd.getPropertyType());
     if (isCollection) {
       ParameterizedType pt = (ParameterizedType) (pd.getReadMethod()
           .getGenericReturnType());
-      System.out.println(pt);
-      return null;
+      return (Class<?>) pt.getActualTypeArguments()[0];
     } else {
       throw new IllegalArgumentException("PropertyDescriptor does not describe a collection property.");
     }
+  }
+
+  public static boolean isCollection(PropertyDescriptor pd) {
+    return isCollection(pd.getPropertyType());
+  }
+
+  public static boolean isCollection(Class<?> propertyType) {
+    return Collection.class.isAssignableFrom(propertyType);
+  }
+
+  public static <S, T> PropertyDescriptor getPropertyDescriptorBySensorCall(Class<T> type,
+      TypedSelector<S, T> fieldSelector) {
+    requireNonNull(fieldSelector, "Type may not be null.");
+    InvocationSensor<T> invocationSensor = new InvocationSensor<T>(type);
+    T sensor = invocationSensor.getSensor();
+    fieldSelector.selectField(sensor);
+
+    if (invocationSensor.hasTrackedProperties()) {
+      // ...make sure it was exactly one property interaction
+      List<String> trackedPropertyNames = invocationSensor.getTrackedPropertyNames();
+      denyMultipleInteractions(trackedPropertyNames);
+      // get the property name
+      String propertyName = trackedPropertyNames.get(0);
+      // find the property descriptor or fail with an exception
+      return getPropertyDescriptorOrFail(type, propertyName);
+    } else {
+      throw zeroInteractions();
+    }
+  }
+
+  static void denyMultipleInteractions(List<String> trackedPropertyNames) {
+    if (trackedPropertyNames.size() > 1) {
+      throw multipleInteractions(trackedPropertyNames);
+    }
+  }
+
+  /**
+   * Ensures that the specified property name is a property in the specified
+   * {@link Set} of {@link PropertyDescriptor}s.
+   *
+   * @param target
+   *        Defines if the properties are validated against source or target
+   *        rules.
+   * @param type
+   *        The inspected type.
+   * @param propertyName
+   *        The property name
+   */
+  static PropertyDescriptor getPropertyDescriptorOrFail(Class<?> type, String propertyName) {
+    Optional<PropertyDescriptor> property;
+    property = Properties.getProperties(type)
+        .stream()
+        .filter(pd -> pd.getName()
+            .equals(propertyName))
+        .findFirst();
+    if (property.isPresent()) {
+      return property.get();
+    } else {
+      throw notAProperty(type, propertyName);
+    }
+
   }
 
   /**
@@ -285,10 +355,6 @@ class ReflectionUtil {
     } catch (Exception e) {
       throw ReflectionException.newInstanceFailed(type, e);
     }
-  }
-
-  public static boolean isCollection(Class<?> propertyType) {
-    return Collection.class.isAssignableFrom(propertyType);
   }
 
 }

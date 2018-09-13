@@ -56,13 +56,6 @@ public class ReflectionException extends RuntimeException {
         .format("The field selector for method '%s' tracked zero interactions with properties.", configurationMethod));
   }
 
-  static ReflectionException multipleInteractions(String configurationMethod, List<String> trackedPropertyNames) {
-    return new ReflectionException(String.format(
-        "The field selector for method '%s' tracked multiple interactions with the following properties: %s."
-            + " Only one interaction perfield selector is allowed!",
-        configurationMethod, String.join(",", trackedPropertyNames)));
-  }
-
   static ReflectionException notAProperty(Class<?> type, String property) {
     return new ReflectionException(String.format(
         "The get-method for property '%s' in type %s is not a valid Java Bean property.", property, type.getName()));
@@ -108,6 +101,16 @@ public class ReflectionException extends RuntimeException {
     return new ReflectionException(
         String.format("The collection '%s' is currently not supported. Only java.util.Set and java.util.List"
             + " are supported collections.", collectionType.getName()));
+  }
+
+  static ReflectionException zeroInteractions() {
+    return new ReflectionException(String.format("The field selector tracked zero interactions with properties."));
+  }
+
+  static ReflectionException multipleInteractions(List<String> trackedPropertyNames) {
+    return new ReflectionException(
+        String.format("The field selector tracked multiple interactions with the following properties: %s."
+            + " Only one interaction perfield selector is allowed!", String.join(",", trackedPropertyNames)));
   }
 
 }
