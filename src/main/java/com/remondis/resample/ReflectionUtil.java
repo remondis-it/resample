@@ -124,23 +124,37 @@ class ReflectionUtil {
   }
 
   /**
-   * Checks if the specified type is a Java build-in type. The build-in types are
-   * the object versions of the Java primitives like {@link Integer}, {@link Long}
-   * but also {@link String}.
+   * Checks if the specified type is a Java primitive type.
    *
    * @param type
    *        The type to check
-   * @return Returns <code>true</code> if the specified type is a java build-in
-   *         type.
+   * @return Returns <code>true</code> if the specified type is a Java primitive
+   *         type, otherwise <code>false</code> is returned.
    */
   public static boolean isPrimitive(Class<?> type) {
     return PRIMITIVE_TYPES.contains(type);
   }
 
+  /**
+   * Checks if the specified type is a Java primitive or a wrapper type.
+   *
+   * @param type
+   *        The type to check
+   * @return Returns <code>true</code> if the specified type is a Java primitive or a wrapper
+   *         type, otherwise <code>false</code> is returned.
+   */
   public static boolean isPrimitiveCompatible(Class<?> type) {
     return isPrimitive(type) || isWrapperType(type);
   }
 
+  /**
+   * Checks if the specified type is a Java wrapper type.
+   *
+   * @param type
+   *        The type to check
+   * @return Returns <code>true</code> if the specified type is a Java wrapper
+   *         type, otherwise <code>false</code> is returned.
+   */
   public static boolean isWrapperType(Class<?> type) {
     return WRAPPERS_TO_PRIMITIVES.containsKey(type);
   }
@@ -150,12 +164,15 @@ class ReflectionUtil {
    *
    * @param pd {@link PropertyDescriptor}
    * @return Returns <code>true</code> if the specified {@link PropertyDescriptor} references a property that accesses
-   *         {@link Collections} of primitive type wrappers.
+   *         {@link Collections} of primitive type wrappers, otherwise <code>false</code> is returned.
    */
   public static boolean isPrimitiveCollection(PropertyDescriptor pd) {
     return ReflectionUtil.isCollection(pd.getPropertyType()) && isWrapperType(getCollectionType(pd));
   }
 
+  /**
+   * @return Returns the generic type of the collection property the specified {@link PropertyDescriptor} points to.
+   */
   public static Class<?> getCollectionType(PropertyDescriptor pd) {
     boolean isCollection = isCollection(pd.getPropertyType());
     if (isCollection) {
@@ -167,14 +184,37 @@ class ReflectionUtil {
     }
   }
 
+  /**
+   * @return Returns <code>true</code> if the property the specified {@link PropertyDescriptor} points to is a
+   *         collection, otherwise <code>false</code> is returned.
+   */
   public static boolean isCollection(PropertyDescriptor pd) {
     return isCollection(pd.getPropertyType());
   }
 
+  /**
+   * @return Returns <code>true</code> if the type is a
+   *         collection, otherwise <code>false</code> is returned.
+   */
   public static boolean isCollection(Class<?> propertyType) {
     return Collection.class.isAssignableFrom(propertyType);
   }
 
+  /**
+   * Performs a field identification on the specified type using the specified {@link TypedSelector}.
+   * 
+   * <p>
+   * When building libraries that work on a field basis, it can be useful to provide an API that lets the client select
+   * a field on a class since fields cannot be represented as literals. To do this an mock-instance of the target type
+   * is created and a lambda function provided by the client is applied to it. The lambda is expected to call a
+   * get-method for the property/field to select. This call identifies a field in the specified class that can then be
+   * used by the library for any reflective purpose.
+   * </p>
+   * 
+   * @param type The type of Java Bean.
+   * @param fieldSelector The field selector lambda performing a single get-method call to select a property.
+   * @return Returns the {@link PropertyDescriptor} that was selected by the {@link TypedSelector}.
+   */
   public static <S, T> PropertyDescriptor getPropertyDescriptorBySensorCall(Class<T> type,
       TypedSelector<S, T> fieldSelector) {
     requireNonNull(fieldSelector, "Type must not be null.");

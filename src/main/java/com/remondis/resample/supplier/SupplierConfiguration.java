@@ -16,6 +16,9 @@ import org.springframework.context.annotation.Configuration;
 
 import com.remondis.resample.FunctionSupplier;
 
+/**
+ * A configuration for an Application Context providing the most common suppliers for JDK classes.
+ */
 @Configuration
 public class SupplierConfiguration {
 

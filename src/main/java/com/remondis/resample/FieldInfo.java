@@ -15,10 +15,16 @@ public class FieldInfo {
     this.type = type;
   }
 
+  /**
+   * @return Returns the simple property name of the field.
+   */
   public String getPropertyName() {
     return propertyName;
   }
 
+  /**
+   * @return Returns the type of the field.
+   */
   public Class<?> getType() {
     return type;
   }

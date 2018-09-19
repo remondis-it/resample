@@ -3,6 +3,9 @@ package com.remondis.resample;
 import java.beans.PropertyDescriptor;
 import java.util.List;
 
+/**
+ * Thrown if something goes wrong when generating sample data.
+ */
 public class SampleException extends RuntimeException {
 
   protected SampleException() {

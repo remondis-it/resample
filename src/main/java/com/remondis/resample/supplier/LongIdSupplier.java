@@ -9,6 +9,12 @@ import org.springframework.stereotype.Component;
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FunctionSupplier;
 
+/**
+ * A supplier implementation that generates {@link Long} values. This supplier uses the
+ * {@link Suppliers#defaultLongSupplier()} to generate values, but if the field is named 'id' the supplier will return
+ * <code>1L</code>. This is a common value for Ids when working with databases.
+ * 
+ */
 @Component
 public class LongIdSupplier extends FunctionSupplier<Long> {
 

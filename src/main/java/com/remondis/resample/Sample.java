@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * The {@link Sample} class can generate instances of beans containing sample
- * data. You can configure data factories per field. Note that the type to
+ * data. You can configure data factories per type or per field. Note that the type to
  * generate sample instances for must be a Java Bean:
  *
  * <ul>
@@ -60,7 +60,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   private boolean useAutoSampling;
 
-  public Sample(Class<T> type) {
+  private Sample(Class<T> type) {
     super();
     this.type = type;
   }
@@ -69,6 +69,13 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return nonNull(context);
   }
 
+  /**
+   * Configures the {@link Sample} instance to use the Spring Application Context. Instances of {@link SampleSupplier}s
+   * in the app ctx will be registered to be used for their specified type.
+   * 
+   * @param context The application context
+   * @return Returns this object for method chaining.
+   */
   @SuppressWarnings("rawtypes")
   public Sample<T> useApplicationContext(ApplicationContext context) {
     requireNonNull(context, "Application context must not be null!");
@@ -84,48 +91,88 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return this;
   }
 
+  /**
+   * Configures the {@link Sample} instance to use auto-sampling. The generator will then try to generate all transitive
+   * object references by using the same instance of {@link Sample}.
+   * 
+   * @return Returns this object for method chaining.
+   */
   public Sample<T> useAutoSampling() {
     this.useAutoSampling = true;
     return this;
   }
 
+  /**
+   * Configures the {@link Sample} instance to use auto-sampling. The generator will then try to generate all transitive
+   * object references by using the same instance of {@link Sample}. This helps to reduce configuration overhead when
+   * sampling Java Beans.
+   * 
+   * @return Returns this object for method chaining.
+   */
   public <S> Sample<T> useSample(Sample<S> sample) {
     use((Supplier<S>) sample).forType(sample.getType());
     return this;
   }
 
+  /**
+   * Configures the {@link Supplier} to be used by this {@link Sample} instance. The scope in which this supplier is
+   * used is defined on the object that is returned by this method.
+   * 
+   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   */
   public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
     return use(fieldInfo -> {
       return supplier.get();
     });
   }
 
+  /**
+   * Configures the {@link Function} to be used by this {@link Sample} instance. The scope in which this function is
+   * used is defined on the object that is returned by this method.
+   * 
+   * <p>
+   * This method enables supplier implementations to get more information of the target field.
+   * </p>
+   * 
+   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   */
   public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
     requireNonNull(function, "Function must not be null.");
     return new SettingBuilder<T, S>(this, function);
   }
 
+  /**
+   * Configures a {@link Function} to be used as enum value supplier function.
+   * 
+   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   */
   public Sample<T> useForEnum(Function<FieldInfo, Enum<?>> function) {
     this.enumValueSupplier = function;
     return this;
   }
 
+  /**
+   * Activates a check to ensure that all Bean properties got a sample instance value after generation.
+   * 
+   * @return Returns this object for method chaining.
+   */
   public Sample<T> checkForNullFields() {
     this.checkForNullFields = true;
     return this;
   }
 
+  /**
+   * Deactivates the instance check: It is possible to skip fields in the sample configuration so no values will be
+   * generated for them.
+   * 
+   * @return Returns this object for method chaining.
+   */
   public Sample<T> ignoreNullFields() {
     this.checkForNullFields = false;
     return this;
   }
 
   <S> void addTypeSetting(Function<FieldInfo, S> supplier, Class<? super S> type) {
-    // TODO: Evaluate if this limitation is needed.
-    // if (isPrimitive(type)) {
-    // throw new IllegalArgumentException(
-    // "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
-    // }
     this.typeSettings.put(type, supplier);
   }
 
@@ -147,6 +194,9 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return get();
   }
 
+  /**
+   * @return Generates and returns a new instance of the specified type.
+   */
   public T newInstance() {
     try {
       T newInstance = createNewInstance(type);

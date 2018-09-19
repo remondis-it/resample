@@ -5,7 +5,7 @@ import static java.util.Arrays.asList;
 import java.util.Collection;
 import java.util.function.Function;
 
-public class CollectionSupplierWrapper<S> implements Function<FieldInfo, Collection<S>> {
+class CollectionSupplierWrapper<S> implements Function<FieldInfo, Collection<S>> {
 
   private Function<FieldInfo, S> supplier;
   private Class<?> propertyType;
