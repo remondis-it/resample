@@ -253,7 +253,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     autoSample.checkForNullFields = this.checkForNullFields;
     autoSample.context = this.context;
     if (nonNull(appCtxProviders)) {
-      autoSample.appCtxProviders = new Hashtable(this.appCtxProviders);
+      autoSample.appCtxProviders = new Hashtable<>(this.appCtxProviders);
     }
     autoSample.enumValueSupplier = this.enumValueSupplier;
     autoSample.useAutoSampling = this.useAutoSampling;
@@ -309,6 +309,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private Function<FieldInfo, ?> wrapInList(PropertyDescriptor pd, Function<FieldInfo, ?> supplier) {
     return (fi) -> {
       Class<?> collectionType = getCollectionType(pd);
