@@ -4,8 +4,8 @@ import static com.remondis.resample.ReflectionUtil.defaultValue;
 import static com.remondis.resample.ReflectionUtil.getCollectionType;
 import static com.remondis.resample.ReflectionUtil.getCollector;
 import static com.remondis.resample.ReflectionUtil.isCollection;
-import static com.remondis.resample.ReflectionUtil.isPrimitive;
 import static com.remondis.resample.ReflectionUtil.isPrimitiveCollection;
+import static com.remondis.resample.ReflectionUtil.isPrimitiveCompatible;
 import static com.remondis.resample.SampleException.valueSupplierException;
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
@@ -121,10 +121,11 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   <S> void addTypeSetting(Function<FieldInfo, S> supplier, Class<? super S> type) {
-    if (isPrimitive(type)) {
-      throw new IllegalArgumentException(
-          "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
-    }
+    // TODO: Evaluate if this limitation is needed.
+    // if (isPrimitive(type)) {
+    // throw new IllegalArgumentException(
+    // "Type settings are not allowed for primitive types. Please specify primitive types on fields.");
+    // }
     this.typeSettings.put(type, supplier);
   }
 
@@ -298,7 +299,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return Properties.getProperties(type)
         .stream()
         .filter(pd -> {
-          return isPrimitive(pd.getPropertyType()) || isPrimitiveCollection(pd);
+          return isPrimitiveCompatible(pd.getPropertyType()) || isPrimitiveCollection(pd);
         })
         .map(pd -> {
           Class<?> propertyType = pd.getPropertyType();

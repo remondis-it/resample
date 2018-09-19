@@ -1,5 +1,7 @@
 package com.remondis.resample;
 
+import static com.remondis.resample.ReflectionUtil.isWrapperType;
+import static com.remondis.resample.ReflectionUtil.unwrap;
 import static com.remondis.resample.SampleException.multipleInteractions;
 import static com.remondis.resample.SampleException.notAProperty;
 import static com.remondis.resample.SampleException.zeroInteractions;
@@ -26,6 +28,9 @@ public class SettingBuilder<T, S> {
   public Sample<T> forType(Class<S> type) {
     requireNonNull(type, "Type may not be null.");
     resample.addTypeSetting(supplier, type);
+    if (isWrapperType(type)) {
+      resample.addTypeSetting(supplier, unwrap(type));
+    }
     return resample;
   }
 

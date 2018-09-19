@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,10 +35,14 @@ class ReflectionUtil {
   static final String GET = "get";
   static final String SET = "set";
 
+  private static final Set<Class<?>> PRIMITIVE_TYPES;
   private static final Set<Class<?>> BUILD_IN_TYPES;
   private static final Map<Class<?>, Object> DEFAULT_VALUES;
+  private static final Map<Class<?>, Class<?>> PRIMITIVES_TO_WRAPPERS;
+  private static final Map<Class<?>, Class<?>> WRAPPERS_TO_PRIMITIVES;
 
   static {
+
     // schuettec - 08.02.2017 : According to the spec:
     // https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html
     Map<Class<?>, Object> map = new HashMap<Class<?>, Object>();
@@ -59,6 +64,16 @@ class ReflectionUtil {
     map.put(Double.class, 0d);
     DEFAULT_VALUES = Collections.unmodifiableMap(map);
 
+    PRIMITIVE_TYPES = new HashSet<>();
+    PRIMITIVE_TYPES.add(boolean.class);
+    PRIMITIVE_TYPES.add(char.class);
+    PRIMITIVE_TYPES.add(byte.class);
+    PRIMITIVE_TYPES.add(short.class);
+    PRIMITIVE_TYPES.add(int.class);
+    PRIMITIVE_TYPES.add(long.class);
+    PRIMITIVE_TYPES.add(float.class);
+    PRIMITIVE_TYPES.add(double.class);
+
     BUILD_IN_TYPES = new HashSet<>();
     BUILD_IN_TYPES.add(Boolean.class);
     BUILD_IN_TYPES.add(Character.class);
@@ -69,6 +84,28 @@ class ReflectionUtil {
     BUILD_IN_TYPES.add(Float.class);
     BUILD_IN_TYPES.add(Double.class);
     BUILD_IN_TYPES.add(String.class);
+
+    PRIMITIVES_TO_WRAPPERS = new Hashtable<Class<?>, Class<?>>();
+    PRIMITIVES_TO_WRAPPERS.put(boolean.class, Boolean.class);
+    PRIMITIVES_TO_WRAPPERS.put(byte.class, Byte.class);
+    PRIMITIVES_TO_WRAPPERS.put(char.class, Character.class);
+    PRIMITIVES_TO_WRAPPERS.put(double.class, Double.class);
+    PRIMITIVES_TO_WRAPPERS.put(float.class, Float.class);
+    PRIMITIVES_TO_WRAPPERS.put(int.class, Integer.class);
+    PRIMITIVES_TO_WRAPPERS.put(long.class, Long.class);
+    PRIMITIVES_TO_WRAPPERS.put(short.class, Short.class);
+    PRIMITIVES_TO_WRAPPERS.put(void.class, Void.class);
+
+    WRAPPERS_TO_PRIMITIVES = new Hashtable<Class<?>, Class<?>>();
+    WRAPPERS_TO_PRIMITIVES.put(Boolean.class, boolean.class);
+    WRAPPERS_TO_PRIMITIVES.put(Byte.class, byte.class);
+    WRAPPERS_TO_PRIMITIVES.put(Character.class, char.class);
+    WRAPPERS_TO_PRIMITIVES.put(Double.class, double.class);
+    WRAPPERS_TO_PRIMITIVES.put(Float.class, float.class);
+    WRAPPERS_TO_PRIMITIVES.put(Integer.class, int.class);
+    WRAPPERS_TO_PRIMITIVES.put(Long.class, long.class);
+    WRAPPERS_TO_PRIMITIVES.put(Short.class, short.class);
+    WRAPPERS_TO_PRIMITIVES.put(Void.class, void.class);
 
   }
 
@@ -97,11 +134,26 @@ class ReflectionUtil {
    *         type.
    */
   public static boolean isPrimitive(Class<?> type) {
-    return DEFAULT_VALUES.containsKey(type);
+    return PRIMITIVE_TYPES.contains(type);
   }
 
+  public static boolean isPrimitiveCompatible(Class<?> type) {
+    return isPrimitive(type) || isWrapperType(type);
+  }
+
+  public static boolean isWrapperType(Class<?> type) {
+    return WRAPPERS_TO_PRIMITIVES.containsKey(type);
+  }
+
+  /**
+   * Checks if a {@link Collection} stores values of JDK primitive wrapper types.
+   *
+   * @param pd {@link PropertyDescriptor}
+   * @return Returns <code>true</code> if the specified {@link PropertyDescriptor} references a property that accesses
+   *         {@link Collections} of primitive type wrappers.
+   */
   public static boolean isPrimitiveCollection(PropertyDescriptor pd) {
-    return ReflectionUtil.isCollection(pd.getPropertyType()) && isPrimitive(getCollectionType(pd));
+    return ReflectionUtil.isCollection(pd.getPropertyType()) && isWrapperType(getCollectionType(pd));
   }
 
   public static Class<?> getCollectionType(PropertyDescriptor pd) {
@@ -355,6 +407,16 @@ class ReflectionUtil {
     } catch (Exception e) {
       throw ReflectionException.newInstanceFailed(type, e);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Class<T> wrap(Class<T> c) {
+    return c.isPrimitive() ? (Class<T>) PRIMITIVES_TO_WRAPPERS.get(c) : c;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Class<T> unwrap(Class<T> c) {
+    return isWrapperType(c) ? (Class<T>) WRAPPERS_TO_PRIMITIVES.get(c) : c;
   }
 
 }

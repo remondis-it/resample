@@ -1,5 +1,6 @@
 package com.remondis.resample.supplier;
 
+import static com.remondis.resample.supplier.Suppliers.dateSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
 import static com.remondis.resample.supplier.Suppliers.timeZoneSupplier;
@@ -7,6 +8,7 @@ import static com.remondis.resample.supplier.Suppliers.zonedDateTimeSupplier;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,11 @@ import com.remondis.resample.FunctionSupplier;
 
 @Configuration
 public class SupplierConfiguration {
+
+  @Bean
+  public FunctionSupplier<Date> beanDateSupplier() {
+    return new FunctionSupplier<>(Date.class, dateSupplier());
+  }
 
   @Bean
   public FunctionSupplier<LocalDate> beanLocalDateSupplier() {

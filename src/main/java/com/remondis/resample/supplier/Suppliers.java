@@ -1,5 +1,7 @@
 package com.remondis.resample.supplier;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -38,12 +40,10 @@ public class Suppliers {
    */
   public static Function<FieldInfo, LocalDate> localDateSupplier() {
     return (info) -> {
-      if (info.getPropertyName()
-          .contains("from")) {
+      if (isPeriodStartField(info)) {
         return LocalDate.now()
             .minus(1, ChronoUnit.DAYS);
-      } else if (info.getPropertyName()
-          .contains("to")) {
+      } else if (isPeriodEndField(info)) {
         return LocalDate.now()
             .plus(1, ChronoUnit.DAYS);
       } else {
@@ -64,13 +64,11 @@ public class Suppliers {
   public static Function<FieldInfo, Date> dateSupplier() {
     final Calendar cal = Calendar.getInstance();
     return (info) -> {
-      if (info.getPropertyName()
-          .contains("from")) {
+      if (isPeriodStartField(info)) {
         cal.add(Calendar.DATE, -1);
         return new Date(cal.getTime()
             .getTime());
-      } else if (info.getPropertyName()
-          .contains("to")) {
+      } else if (isPeriodEndField(info)) {
         cal.add(Calendar.DATE, 1);
         return new Date(cal.getTime()
             .getTime());
@@ -79,6 +77,21 @@ public class Suppliers {
             .getTime());
       }
     };
+  }
+
+  private static boolean isPeriodEndField(FieldInfo info) {
+    return containsIngoreCase(info.getPropertyName(), "to") || containsIngoreCase(info.getPropertyName(), "end");
+  }
+
+  private static boolean isPeriodStartField(FieldInfo info) {
+    return containsIngoreCase(info.getPropertyName(), "from") || containsIngoreCase(info.getPropertyName(), "start");
+  }
+
+  static boolean containsIngoreCase(String string, String pattern) {
+    requireNonNull(pattern, "pattern");
+    requireNonNull(string, "string");
+    return string.toLowerCase()
+        .contains(pattern.toLowerCase());
   }
 
   public static Function<FieldInfo, TimeZone> timeZoneSupplier() {
@@ -96,14 +109,10 @@ public class Suppliers {
    */
   public static Function<FieldInfo, ZonedDateTime> zonedDateTimeSupplier() {
     return (info) -> {
-      if (info.getPropertyName()
-          .toLowerCase()
-          .contains("from")) {
+      if (isPeriodStartField(info)) {
         return ZonedDateTime.now()
             .minus(1, ChronoUnit.DAYS);
-      } else if (info.getPropertyName()
-          .toLowerCase()
-          .contains("to")) {
+      } else if (isPeriodEndField(info)) {
         return ZonedDateTime.now()
             .plus(1, ChronoUnit.DAYS);
       } else {
@@ -129,4 +138,65 @@ public class Suppliers {
       return new String(fi.getPropertyName());
     };
   }
+
+  public static Function<FieldInfo, Long> defaultLongSupplier() {
+    return (fi) -> 0L;
+  }
+
+  public static Function<FieldInfo, Boolean> defaultBooleanSupplier() {
+    return (fi) -> false;
+  }
+
+  public static Function<FieldInfo, Character> defaultCharacterSupplier() {
+    return (fi) -> '\0';
+  }
+
+  public static Function<FieldInfo, Byte> defaultByteSupplier() {
+    return (fi) -> (byte) 0;
+  }
+
+  public static Function<FieldInfo, Short> defaultShortSupplier() {
+    return (fi) -> (short) 0;
+  }
+
+  public static Function<FieldInfo, Integer> defaultIntegerSupplier() {
+    return (fi) -> (Integer) 0;
+  }
+
+  public static Function<FieldInfo, Float> defaultFloatSupplier() {
+    return (fi) -> (Float) 0f;
+  }
+
+  public static Function<FieldInfo, Double> defaultDoubleSupplier() {
+    return (fi) -> (Double) 0d;
+  }
+
+  public static Function<FieldInfo, Long> oneLongSupplier() {
+    return (fi) -> 1L;
+  }
+
+  public static Function<FieldInfo, Boolean> trueBooleanSupplier() {
+    return (fi) -> true;
+  }
+
+  public static Function<FieldInfo, Byte> oneByteSupplier() {
+    return (fi) -> (byte) 1;
+  }
+
+  public static Function<FieldInfo, Short> oneShortSupplier() {
+    return (fi) -> (short) 1;
+  }
+
+  public static Function<FieldInfo, Integer> oneIntegerSupplier() {
+    return (fi) -> (Integer) 1;
+  }
+
+  public static Function<FieldInfo, Float> oneFloatSupplier() {
+    return (fi) -> (Float) 1f;
+  }
+
+  public static Function<FieldInfo, Double> oneDoubleSupplier() {
+    return (fi) -> (Double) 1d;
+  }
+
 }

@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.function.Supplier;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -40,6 +41,7 @@ public class SampleTest {
   @Mock
   private Supplier<LocalDate> localDateSupplier;
 
+  @Ignore // Evaluate: Is the limitation this test ensures really necessary?
   @Test
   public void shouldDenyPrimitiveTypeSetting() {
     assertThatThrownBy(() -> {
@@ -49,6 +51,46 @@ public class SampleTest {
           .newInstance();
     }).isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Type settings are not allowed for primitive types. Please specify primitive types on fields.");
+  }
+
+  @Test
+  public void shouldUseWrapperTypeSuppliersForPrimitiveTypes() {
+    Person person = Sample.of(Person.class)
+        .use(() -> 1)
+        .forType(Integer.class)
+        .use(stringSupplier)
+        .forType(String.class)
+        .use(localDateSupplier)
+        .forField(Person::getBrithday)
+        .useForEnum(enumValueSupplier())
+        .newInstance();
+    assertEquals(1, person.getAge());
+  }
+
+  @Test
+  public void shouldUsePrimitiveTypeSuppliers() {
+    Person person = Sample.of(Person.class)
+        .use(() -> 1)
+        .forType(int.class)
+        .use(stringSupplier)
+        .forType(String.class)
+        .use(localDateSupplier)
+        .forField(Person::getBrithday)
+        .useForEnum(enumValueSupplier())
+        .newInstance();
+    assertEquals(1, person.getAge());
+  }
+
+  /**
+   * The field uses the wrapper type, so a type setting for long.class should not work.
+   */
+  @Test
+  public void shouldNotUsePrimitiveTypeSuppliersForWrapperTypedFields() {
+    WrapperTypeDto instance = Sample.of(WrapperTypeDto.class)
+        .use(() -> 1L)
+        .forType(long.class)
+        .newInstance();
+    assertEquals(0, (long) instance.getNumber());
   }
 
   @Test
