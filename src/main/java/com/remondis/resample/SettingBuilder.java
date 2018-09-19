@@ -14,6 +14,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * The {@link SettingBuilder} defines the second stage when defining rules for sample data generation.
+ * 
+ * @param <T> The type to create sample instance for.
+ * @param <S> The type of field to configure.
+ */
 public class SettingBuilder<T, S> {
 
   private Function<FieldInfo, S> supplier;
@@ -21,12 +27,13 @@ public class SettingBuilder<T, S> {
 
   SettingBuilder(Sample<T> resample, Function<FieldInfo, S> supplier) {
     super();
+    requireNonNull(supplier, "supplier must not be null.");
     this.supplier = supplier;
     this.resample = resample;
   }
 
   public Sample<T> forType(Class<S> type) {
-    requireNonNull(type, "Type may not be null.");
+    requireNonNull(type, "Type must not be null.");
     resample.addTypeSetting(supplier, type);
     if (isWrapperType(type)) {
       resample.addTypeSetting(supplier, unwrap(type));
@@ -35,7 +42,7 @@ public class SettingBuilder<T, S> {
   }
 
   public Sample<T> forField(TypedSelector<S, T> fieldSelector) {
-    requireNonNull(fieldSelector, "Type may not be null.");
+    requireNonNull(fieldSelector, "Type must not be null.");
     Class<T> sensorType = resample.getType();
     InvocationSensor<T> invocationSensor = new InvocationSensor<T>(sensorType);
     T sensor = invocationSensor.getSensor();
@@ -57,7 +64,7 @@ public class SettingBuilder<T, S> {
   }
 
   public Sample<T> forFieldCollection(TypedSelector<Collection<S>, T> fieldSelector) {
-    requireNonNull(fieldSelector, "Type may not be null.");
+    requireNonNull(fieldSelector, "Type must not be null.");
     Class<T> sensorType = resample.getType();
     InvocationSensor<T> invocationSensor = new InvocationSensor<T>(sensorType);
     T sensor = invocationSensor.getSensor();

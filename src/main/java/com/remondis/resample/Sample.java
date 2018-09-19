@@ -101,7 +101,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
-    requireNonNull(function, "Function may not be null.");
+    requireNonNull(function, "Function must not be null.");
     return new SettingBuilder<T, S>(this, function);
   }
 

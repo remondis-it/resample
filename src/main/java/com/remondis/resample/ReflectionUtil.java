@@ -177,7 +177,7 @@ class ReflectionUtil {
 
   public static <S, T> PropertyDescriptor getPropertyDescriptorBySensorCall(Class<T> type,
       TypedSelector<S, T> fieldSelector) {
-    requireNonNull(fieldSelector, "Type may not be null.");
+    requireNonNull(fieldSelector, "Type must not be null.");
     InvocationSensor<T> invocationSensor = new InvocationSensor<T>(type);
     T sensor = invocationSensor.getSensor();
     fieldSelector.selectField(sensor);
