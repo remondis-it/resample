@@ -8,6 +8,7 @@ import static com.remondis.resample.ReflectionUtil.isPrimitiveCollection;
 import static com.remondis.resample.ReflectionUtil.isPrimitiveCompatible;
 import static com.remondis.resample.SampleException.valueSupplierException;
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
@@ -40,11 +41,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @param <T>
  */
-public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
-  public static <T> Sample<T> of(Class<T> type) {
-    return new Sample<>(type);
-  }
-
+public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   private Class<T> type;
 
   private Map<Class<?>, Function<FieldInfo, ?>> typeSettings = new Hashtable<>();
@@ -60,7 +57,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   private boolean useAutoSampling;
 
-  private Sample(Class<T> type) {
+  Sample(Class<T> type) {
     super();
     this.type = type;
   }
@@ -248,7 +245,7 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       type = pd.getPropertyType();
     }
 
-    Sample<?> autoSample = Sample.of(type);
+    Sample<?> autoSample = Samples.of(type);
     autoSample.typeSettings = new Hashtable<>(this.typeSettings);
     autoSample.checkForNullFields = this.checkForNullFields;
     autoSample.context = this.context;
@@ -386,16 +383,8 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
           .filter(pd -> {
             return !fieldSettings.containsKey(pd);
           })
-          .filter(pd -> {
-            if (isCollection(pd)) {
-              return appCtxProviders.containsKey(getCollectionType(pd));
-            } else {
-              return appCtxProviders.containsKey(pd.getPropertyType());
-            }
-          })
           .map(pd -> {
-            setValueFromApplicationContext(newInstance, pd);
-            return pd;
+            return setValueFromApplicationContext(newInstance, pd);
           })
           .collect(Collectors.toSet());
     } else {
@@ -423,15 +412,26 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
         .collect(Collectors.toSet());
   }
 
-  private void setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
+  private PropertyDescriptor setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
+    Class<?> propertyType = null;
     if (isCollection(pd)) {
-      Class<?> propertyType = getCollectionType(pd);
-      SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
-      setValue(pd, newInstance, wrapInList(pd, supplier::newInstance));
+      propertyType = getCollectionType(pd);
     } else {
-      Class<?> propertyType = pd.getPropertyType();
-      SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
+      propertyType = pd.getPropertyType();
+    }
+    // If there is an exact match, take it
+    SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
+    // If there was nothing found, check if a wrapper-supplier is registered for primitive types and if so, take that!
+    if (isNull(supplier) && propertyType.isPrimitive()) {
+      Class<?> wrapperType = ReflectionUtil.wrap(propertyType);
+      supplier = appCtxProviders.get(wrapperType);
+    }
+
+    if (isNull(supplier)) {
+      return null;
+    } else {
       setValue(pd, newInstance, supplier::newInstance);
+      return pd;
     }
   }
 
@@ -499,6 +499,10 @@ public class Sample<T> implements SampleSupplier<T>, Supplier<T> {
               .append("\n");
         });
     return b.toString();
+  }
+
+  boolean hasTypeSetting(Class<?> type) {
+    return typeSettings.containsKey(type);
   }
 
 }

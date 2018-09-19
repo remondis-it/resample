@@ -34,7 +34,10 @@ public class SettingBuilder<T, S> {
     requireNonNull(type, "Type must not be null.");
     resample.addTypeSetting(supplier, type);
     if (isWrapperType(type)) {
-      resample.addTypeSetting(supplier, unwrap(type));
+      // Do not override primitive type setting if there is an explicit one.
+      if (!resample.hasTypeSetting(unwrap(type))) {
+        resample.addTypeSetting(supplier, unwrap(type));
+      }
     }
     return resample;
   }

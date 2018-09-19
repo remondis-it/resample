@@ -13,7 +13,7 @@ public class ListTest {
 
   @Test
   public void shouldGenerateList() {
-    ListDto instance = Sample.of(ListDto.class)
+    ListDto instance = Samples.of(ListDto.class)
         .useForEnum(enumValueSupplier())
         .use(fieldNameStringSupplier())
         .forType(String.class)

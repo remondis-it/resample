@@ -67,7 +67,7 @@ public class SampleService {
    */
   private static <T> Sample<T> getSample(Class<T> type) {
     requireNonNull(type, "Type must not be null.");
-    Sample<T> sample = Sample.of(type)
+    Sample<T> sample = Samples.of(type)
         .checkForNullFields()
         .use(fieldNameStringSupplier())
         .forType(String.class)

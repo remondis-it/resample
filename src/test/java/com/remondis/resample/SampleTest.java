@@ -45,7 +45,7 @@ public class SampleTest {
   @Test
   public void shouldDenyPrimitiveTypeSetting() {
     assertThatThrownBy(() -> {
-      Sample.of(Person.class)
+      Samples.of(Person.class)
           .use(() -> 1L)
           .forType(Long.class)
           .newInstance();
@@ -55,7 +55,7 @@ public class SampleTest {
 
   @Test
   public void shouldUseWrapperTypeSuppliersForPrimitiveTypes() {
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .use(() -> 1)
         .forType(Integer.class)
         .use(stringSupplier)
@@ -69,7 +69,7 @@ public class SampleTest {
 
   @Test
   public void shouldUsePrimitiveTypeSuppliers() {
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .use(() -> 1)
         .forType(int.class)
         .use(stringSupplier)
@@ -86,7 +86,7 @@ public class SampleTest {
    */
   @Test
   public void shouldNotUsePrimitiveTypeSuppliersForWrapperTypedFields() {
-    WrapperTypeDto instance = Sample.of(WrapperTypeDto.class)
+    WrapperTypeDto instance = Samples.of(WrapperTypeDto.class)
         .use(() -> 1L)
         .forType(long.class)
         .newInstance();
@@ -99,7 +99,7 @@ public class SampleTest {
         .get();
     doReturn(LOCALDATE).when(localDateSupplier)
         .get();
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .use(stringSupplier)
         .forType(String.class)
         .use(localDateSupplier)
@@ -120,7 +120,7 @@ public class SampleTest {
         .get();
     doReturn(LOCALDATE).when(localDateSupplier)
         .get();
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .use(stringSupplier)
         .forType(String.class)
         .use(localDateSupplier)
@@ -138,7 +138,7 @@ public class SampleTest {
 
   @Test
   public void shouldIgnoreNullFields() {
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .ignoreNullFields()
         .newInstance();
     assertNull(person.getBrithday());
@@ -150,7 +150,7 @@ public class SampleTest {
   @Test
   public void shouldDenyNullFieldsAsDefault() {
     assertThatThrownBy(() -> {
-      Sample.of(Person.class)
+      Samples.of(Person.class)
           .newInstance();
     }).isInstanceOf(SampleException.class)
         .hasMessageContaining("The following properties were not covered by the sample generator:");
@@ -159,7 +159,7 @@ public class SampleTest {
   @Test
   public void shouldDenyNullFields() {
     assertThatThrownBy(() -> {
-      Sample.of(Person.class)
+      Samples.of(Person.class)
           .ignoreNullFields()
           .checkForNullFields()
           .newInstance();
@@ -190,7 +190,7 @@ public class SampleTest {
     doReturn(LOCALDATE).when(localDateSupplier)
         .get();
 
-    Person person = Sample.of(Person.class)
+    Person person = Samples.of(Person.class)
         .use(stringOverridden)
         .forType(String.class)
         .use(localDateOverridden)
@@ -231,24 +231,24 @@ public class SampleTest {
     doReturn(EXPECTED_DATE).when(zonedDateTimeSupplier)
         .get();
 
-    Sample<Address> adressSampler = Sample.of(Address.class)
+    Sample<Address> adressSampler = Samples.of(Address.class)
         .checkForNullFields()
         .use(fieldNameStringSupplier())
         .forType(String.class);
 
-    Sample<ForeignOperatorInfo> foiSampler = Sample.of(ForeignOperatorInfo.class)
+    Sample<ForeignOperatorInfo> foiSampler = Samples.of(ForeignOperatorInfo.class)
         .checkForNullFields()
         .useSample(adressSampler)
         .use(fieldNameStringSupplier())
         .forType(String.class);
 
-    Sample<Facility> facilitySampler = Sample.of(Facility.class)
+    Sample<Facility> facilitySampler = Samples.of(Facility.class)
         .checkForNullFields()
         .use(fieldNameStringSupplier())
         .forType(String.class)
         .useSample(adressSampler);
 
-    Plant plant = Sample.of(Plant.class)
+    Plant plant = Samples.of(Plant.class)
         .checkForNullFields()
         .use(fieldNameStringSupplier())
         .forType(String.class)
