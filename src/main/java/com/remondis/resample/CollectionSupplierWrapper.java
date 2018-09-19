@@ -15,6 +15,7 @@ public class CollectionSupplierWrapper<S> implements Function<FieldInfo, Collect
     this.supplier = supplier;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Collection<S> apply(FieldInfo fi) {
     return (Collection<S>) asList(supplier.apply(fi)).stream()
