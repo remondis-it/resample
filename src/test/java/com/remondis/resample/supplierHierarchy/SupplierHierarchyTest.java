@@ -257,7 +257,6 @@ public class SupplierHierarchyTest {
           .use(() -> 99L)
           .forField(Primitives::getL)
           .newInstance();
-
       assertEquals(99L, instance.getL()); // Make sure the field setting was used here.
       assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
       assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
