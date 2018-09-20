@@ -12,6 +12,8 @@ import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
@@ -29,6 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
 import com.remondis.resample.FieldInfo;
+import com.remondis.resample.Person;
 import com.remondis.resample.SampleSupplier;
 import com.remondis.resample.Samples;
 
@@ -44,6 +47,17 @@ public class SupplierHierarchyTest {
       Samples.of(Enums.class)
           .newInstance();
     }).hasMessageContaining("The following properties were not covered by the sample generator:");
+  }
+
+  @Test
+  public void shouldIgnoreNullFields() {
+    Person person = Samples.of(Person.class)
+        .ignoreNullFields()
+        .newInstance();
+    assertNull(person.getBrithday());
+    assertNull(person.getName());
+    assertNull(person.getForname());
+    assertNotNull(person.getAge());
   }
 
   @Test
@@ -63,12 +77,35 @@ public class SupplierHierarchyTest {
   }
 
   @Test
-  public void shouldUseEnumSupplier() {
+  public void shouldUseGenericEnumSupplier() {
     Enums instance = Samples.of(Enums.class)
         .useForEnum(enumValueSupplier())
         .newInstance();
     assertEquals(Enumeration.ENUM_1, instance.getEnumValue());
     assertThat(instance.getList(), hasItem(Enumeration.ENUM_1));
+    assertThat(instance.getSet(), hasItem(Enumeration.ENUM_1));
+  }
+
+  @Test
+  public void shouldUseTypeSpecificEnumSupplier() {
+    Enums instance = Samples.of(Enums.class)
+        .use(() -> Enumeration.ENUM_2)
+        .forType(Enumeration.class)
+        .newInstance();
+    assertEquals(Enumeration.ENUM_2, instance.getEnumValue());
+    assertThat(instance.getList(), hasItem(Enumeration.ENUM_2));
+    assertThat(instance.getSet(), hasItem(Enumeration.ENUM_2));
+  }
+
+  @Test
+  public void shouldUseFieldSpecificEnumAlongsideGlobalEnumSupplier() {
+    Enums instance = Samples.of(Enums.class)
+        .useForEnum(enumValueSupplier())
+        .use(() -> Enumeration.ENUM_2)
+        .forFieldCollection(Enums::getList)
+        .newInstance();
+    assertEquals(Enumeration.ENUM_1, instance.getEnumValue());
+    assertThat(instance.getList(), hasItem(Enumeration.ENUM_2));
     assertThat(instance.getSet(), hasItem(Enumeration.ENUM_1));
   }
 

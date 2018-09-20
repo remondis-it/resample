@@ -2,7 +2,7 @@ package com.remondis.resample;
 
 import java.time.LocalDate;
 
-import com.remondis.example.Gender;
+import com.remondis.resample.example.Gender;
 
 public class Person {
 

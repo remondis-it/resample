@@ -7,7 +7,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.remondis.example.Gender;
+import com.remondis.resample.example.Gender;
 
 public class ListTest {
 

@@ -3,7 +3,7 @@ package com.remondis.resample;
 import java.util.List;
 import java.util.Set;
 
-import com.remondis.example.Gender;
+import com.remondis.resample.example.Gender;
 
 public class ListDto {
 
