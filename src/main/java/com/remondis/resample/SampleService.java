@@ -65,7 +65,7 @@ public class SampleService {
    * @param type The type to generate sample data for.
    * @return Returns {@link Sample}.
    */
-  private static <T> Sample<T> getSample(Class<T> type) {
+  public static <T> Sample<T> getSample(Class<T> type) {
     requireNonNull(type, "Type must not be null.");
     Sample<T> sample = Samples.of(type)
         .checkForNullFields()

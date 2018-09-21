@@ -124,6 +124,21 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   /**
+   * Configures the {@link SampleSupplier} to be used by this {@link Sample} instance.
+   * <p>
+   * This method does the same as: <br/>
+   * <code>this.use(sampleSupplier::newInstance).forType(sampleSupplier.getType());</code>
+   * </p>
+   * 
+   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   */
+  public <S> Sample<T> use(SampleSupplier<S> sampleSupplier) {
+    this.use(sampleSupplier::newInstance)
+        .forType(sampleSupplier.getType());
+    return this;
+  }
+
+  /**
    * Configures the {@link Function} to be used by this {@link Sample} instance. The scope in which this function is
    * used is defined on the object that is returned by this method.
    * 

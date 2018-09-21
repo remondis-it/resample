@@ -2,8 +2,6 @@ package com.remondis.resample;
 
 import java.time.LocalDate;
 
-import com.remondis.resample.example.Gender;
-
 public class Person {
 
   private String name;

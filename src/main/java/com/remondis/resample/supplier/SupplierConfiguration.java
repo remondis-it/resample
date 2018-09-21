@@ -1,11 +1,13 @@
 package com.remondis.resample.supplier;
 
 import static com.remondis.resample.supplier.Suppliers.dateSupplier;
+import static com.remondis.resample.supplier.Suppliers.defaultBigDecimalSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
 import static com.remondis.resample.supplier.Suppliers.timeZoneSupplier;
 import static com.remondis.resample.supplier.Suppliers.zonedDateTimeSupplier;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -21,6 +23,11 @@ import com.remondis.resample.FunctionSupplier;
  */
 @Configuration
 public class SupplierConfiguration {
+
+  @Bean
+  public FunctionSupplier<BigDecimal> beanBigDecimalSupplier() {
+    return new FunctionSupplier<>(BigDecimal.class, defaultBigDecimalSupplier());
+  }
 
   @Bean
   public FunctionSupplier<Date> beanDateSupplier() {

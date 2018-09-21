@@ -3,8 +3,6 @@ package com.remondis.resample;
 import java.util.List;
 import java.util.Set;
 
-import com.remondis.resample.example.Gender;
-
 public class ListDto {
 
   private List<Gender> listOfEnumValues;

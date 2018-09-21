@@ -2,6 +2,7 @@ package com.remondis.resample.supplier;
 
 import static java.util.Objects.requireNonNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -197,6 +198,14 @@ public class Suppliers {
 
   public static Function<FieldInfo, Double> oneDoubleSupplier() {
     return (fi) -> (Double) 1d;
+  }
+
+  public static Function<FieldInfo, BigDecimal> defaultBigDecimalSupplier() {
+    return (fi) -> BigDecimal.ZERO;
+  }
+
+  public static Function<FieldInfo, BigDecimal> oneBigDecimalSupplier() {
+    return (fi) -> BigDecimal.ONE;
   }
 
 }
