@@ -1,5 +1,5 @@
 
-package com.remondis.resample;
+package com.remondis.resample.lists;
 
 public enum Gender {
   MALE,

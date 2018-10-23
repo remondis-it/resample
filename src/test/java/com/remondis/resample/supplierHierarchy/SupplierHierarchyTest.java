@@ -31,7 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
 import com.remondis.resample.FieldInfo;
-import com.remondis.resample.Person;
 import com.remondis.resample.SampleSupplier;
 import com.remondis.resample.Samples;
 

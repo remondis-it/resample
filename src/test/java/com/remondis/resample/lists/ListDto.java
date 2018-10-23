@@ -1,4 +1,4 @@
-package com.remondis.resample;
+package com.remondis.resample.lists;
 
 import java.util.List;
 import java.util.Set;
@@ -56,6 +56,12 @@ public class ListDto {
 
   public void setSetOfDummies(Set<Dummy> setOfDummies) {
     this.setOfDummies = setOfDummies;
+  }
+
+  @Override
+  public String toString() {
+    return "ListDto [listOfEnumValues=" + listOfEnumValues + ", setOfEnumValues=" + setOfEnumValues + ", setOfLongs="
+        + setOfLongs + ", setOfStrings=" + setOfStrings + ", setOfDummies=" + setOfDummies + "]";
   }
 
 }

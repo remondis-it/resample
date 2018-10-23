@@ -1,6 +1,8 @@
-package com.remondis.resample;
+package com.remondis.resample.supplierHierarchy;
 
 import java.time.LocalDate;
+
+import com.remondis.resample.lists.Gender;
 
 public class Person {
 

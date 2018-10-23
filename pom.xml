@@ -218,7 +218,11 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>BUNDLE</element>
+                                    <excludes>
+                                        <exclude>com.remondis.resample.ReflectionException</exclude>
+                                        <exclude>com.remondis.resample.SampleException</exclude>
+                                    </excludes>
+                                    <element>CLASS</element>
                                     <limits>
                                         <limit>
                                             <counter>BRANCH</counter>
@@ -227,11 +231,6 @@
                                         </limit>
                                         <limit>
                                             <counter>INSTRUCTION</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>1.00</minimum>
-                                        </limit>
-                                        <limit>
-                                            <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>1.00</minimum>
                                         </limit>
