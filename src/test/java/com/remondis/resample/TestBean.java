@@ -34,6 +34,10 @@ public class TestBean {
     return "";
   }
 
+  public void getWithoutReturnValue() {
+
+  }
+
   public String regularMethod() {
     return "";
   }

@@ -1,7 +1,6 @@
 package com.remondis.resample;
 
 import static com.remondis.resample.ReflectionUtil.defaultValue;
-import static com.remondis.resample.ReflectionUtil.hasReturnType;
 import static com.remondis.resample.ReflectionUtil.invokeMethodProxySafe;
 import static com.remondis.resample.ReflectionUtil.isGetter;
 import static com.remondis.resample.ReflectionUtil.toPropertyName;
@@ -24,88 +23,81 @@ import net.sf.cglib.proxy.InvocationHandler;
  */
 class InvocationSensor<T> {
 
-	private T proxyObject;
+  private T proxyObject;
 
-	private List<String> propertyNames = new LinkedList<>();
+  private List<String> propertyNames = new LinkedList<>();
 
-	InvocationSensor(Class<T> superType) {
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(superType);
-		enhancer.setCallback(new InvocationHandler() {
-			@Override
-			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				if (isGetter(method)) {
-					denyNoReturnType(method);
-					// schuettec - Get property name from method and mark this property as called.
-					String propertyName = toPropertyName(method);
-					propertyNames.add(propertyName);
-					// schuettec - Then return an appropriate default value.
-					return nullOrDefaultValue(method.getReturnType());
-				} else if (isObjectMethod(method)) {
-					// schuettec - 08.02.2017 : Methods like toString, equals or hashcode are
-					// redirected to this invocation
-					// handler.
-					return invokeMethodProxySafe(method, this, args);
-				} else {
-					throw ReflectionException.notAGetter(method);
-				}
-			}
+  InvocationSensor(Class<T> superType) {
+    Enhancer enhancer = new Enhancer();
+    enhancer.setSuperclass(superType);
+    enhancer.setCallback(new InvocationHandler() {
+      @Override
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (isGetter(method)) {
+          // schuettec - Get property name from method and mark this property as called.
+          String propertyName = toPropertyName(method);
+          propertyNames.add(propertyName);
+          // schuettec - Then return an appropriate default value.
+          return nullOrDefaultValue(method.getReturnType());
+        } else if (isObjectMethod(method)) {
+          // schuettec - 08.02.2017 : Methods like toString, equals or hashcode are
+          // redirected to this invocation
+          // handler.
+          return invokeMethodProxySafe(method, this, args);
+        } else {
+          throw ReflectionException.notAGetter(method);
+        }
+      }
 
-		});
-		proxyObject = superType.cast(enhancer.create());
-	}
+    });
+    proxyObject = superType.cast(enhancer.create());
+  }
 
-	/**
-	 * Returns the proxy object get-method calls can be performed on.
-	 *
-	 * @return The proxy.
-	 */
-	T getSensor() {
-		return proxyObject;
-	}
+  /**
+   * Returns the proxy object get-method calls can be performed on.
+   *
+   * @return The proxy.
+   */
+  T getSensor() {
+    return proxyObject;
+  }
 
-	/**
-	 * Returns the list of property names that were tracked by get calls.
-	 *
-	 * @return Returns the tracked property names.
-	 */
-	List<String> getTrackedPropertyNames() {
-		return Collections.unmodifiableList(propertyNames);
-	}
+  /**
+   * Returns the list of property names that were tracked by get calls.
+   *
+   * @return Returns the tracked property names.
+   */
+  List<String> getTrackedPropertyNames() {
+    return Collections.unmodifiableList(propertyNames);
+  }
 
-	/**
-	 * Checks if there were any properties accessed by get calls.
-	 *
-	 * @return Returns <code>true</code> if there were at least one interaction with
-	 *         a property. Otherwise <code>false</code> is returned.
-	 */
-	boolean hasTrackedProperties() {
-		return !propertyNames.isEmpty();
-	}
+  /**
+   * Checks if there were any properties accessed by get calls.
+   *
+   * @return Returns <code>true</code> if there were at least one interaction with
+   *         a property. Otherwise <code>false</code> is returned.
+   */
+  boolean hasTrackedProperties() {
+    return !propertyNames.isEmpty();
+  }
 
-	/**
-	 * Resets all tracked information.
-	 */
-	void reset() {
-		propertyNames.clear();
-	}
+  /**
+   * Resets all tracked information.
+   */
+  void reset() {
+    propertyNames.clear();
+  }
 
-	private void denyNoReturnType(Method method) {
-		if (!hasReturnType(method)) {
-			throw ReflectionException.noReturnTypeOnGetter(method);
-		}
-	}
+  private static Object nullOrDefaultValue(Class<?> returnType) {
+    if (returnType.isPrimitive()) {
+      return defaultValue(returnType);
+    } else {
+      return null;
+    }
+  }
 
-	private static Object nullOrDefaultValue(Class<?> returnType) {
-		if (returnType.isPrimitive()) {
-			return defaultValue(returnType);
-		} else {
-			return null;
-		}
-	}
-
-	private static boolean isObjectMethod(Method method) {
-		return method.getDeclaringClass() == Object.class;
-	}
+  private static boolean isObjectMethod(Method method) {
+    return method.getDeclaringClass() == Object.class;
+  }
 
 }
