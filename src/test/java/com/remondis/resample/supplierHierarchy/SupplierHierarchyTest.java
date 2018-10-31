@@ -15,30 +15,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Hashtable;
-import java.util.Map;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.context.ApplicationContext;
 
-import com.remondis.resample.FieldInfo;
-import com.remondis.resample.SampleSupplier;
 import com.remondis.resample.Samples;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SupplierHierarchyTest {
-
-  @Mock
-  private ApplicationContext ctx;
 
   @Test
   public void shouldDefaultToDenyNullFields() {
@@ -66,8 +48,8 @@ public class SupplierHierarchyTest {
     assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
     assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
     assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-    assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-    assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
+    assertEquals(defaultDoubleSupplier().apply(null), instance.getD(), 0d);
+    assertEquals(defaultFloatSupplier().apply(null), instance.getF(), 0f);
     assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
     assertEquals((long) defaultLongSupplier().apply(null), instance.getL());
     assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
@@ -108,136 +90,6 @@ public class SupplierHierarchyTest {
     assertThat(instance.getSet(), hasItem(Enumeration.ENUM_1));
   }
 
-  /**
-   * This test ensures that the default primitive value suppliers can be overridden by app ctx.
-   */
-  @Test
-  @SuppressWarnings({
-      "rawtypes", "unchecked"
-  })
-  public void shouldOverridePrimitiveSupplierByApplicationContext() {
-    Map<String, SampleSupplier> map = new Hashtable<>();
-    SampleSupplier<Long> longSupplier = Mockito.mock(SampleSupplier.class);
-    when(longSupplier.newInstance(any(FieldInfo.class))).thenReturn(-99L);
-    when(longSupplier.getType()).thenReturn(long.class);
-    map.put("long", longSupplier);
-    when(ctx.getBeansOfType(SampleSupplier.class)).thenReturn(map);
-
-    Primitives instance = Samples.of(Primitives.class)
-        .useApplicationContext(ctx)
-        .newInstance();
-
-    assertEquals(-99L, instance.getL());
-    assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
-    assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
-    assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-    assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-    assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
-    assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
-    assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
-    assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
-    assertThat(instance.getFloatSet(), hasItem(defaultFloatSupplier().apply(null)));
-  }
-
-  /**
-   * This test ensures that the default primitive value suppliers can be overridden by app ctx.
-   */
-  @Test
-  @SuppressWarnings({
-      "rawtypes", "unchecked"
-  })
-  public void shouldOverrideWithWrapperIfPrimitiveOverrideDoesNotExistsByApplicationContext() {
-    Map<String, SampleSupplier> map = new Hashtable<>();
-    SampleSupplier<Long> longSupplier = Mockito.mock(SampleSupplier.class);
-    when(longSupplier.newInstance(any(FieldInfo.class))).thenReturn(-99L);
-    when(longSupplier.getType()).thenReturn(Long.class);
-    map.put("LongWrapper", longSupplier);
-    when(ctx.getBeansOfType(SampleSupplier.class)).thenReturn(map);
-
-    Primitives instance = Samples.of(Primitives.class)
-        .useApplicationContext(ctx)
-        .newInstance();
-
-    assertEquals(-99L, instance.getL());
-    assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
-    assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
-    assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-    assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-    assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
-    assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
-    assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
-    assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
-    assertThat(instance.getFloatSet(), hasItem(defaultFloatSupplier().apply(null)));
-  }
-
-  /**
-   * This test ensures that the default primitive value suppliers can be overridden by app ctx.
-   */
-  @Test
-  @SuppressWarnings({
-      "rawtypes", "unchecked"
-  })
-  public void shouldSelectPrimitiveSupplierOverWrapperSupplierFromApplicationContext() {
-    Map<String, SampleSupplier> map = new Hashtable<>();
-    SampleSupplier<Long> longWrapperSupplier = Mockito.mock(SampleSupplier.class);
-    when(longWrapperSupplier.getType()).thenReturn(Long.class);
-    map.put("LongWrapper", longWrapperSupplier);
-    SampleSupplier<Long> longSupplier = Mockito.mock(SampleSupplier.class);
-    when(longSupplier.newInstance(any(FieldInfo.class))).thenReturn(-99L);
-    when(longSupplier.getType()).thenReturn(long.class);
-    map.put("Long", longSupplier);
-    when(ctx.getBeansOfType(SampleSupplier.class)).thenReturn(map);
-
-    Primitives instance = Samples.of(Primitives.class)
-        .useApplicationContext(ctx)
-        .newInstance();
-
-    verify(longWrapperSupplier, never()).newInstance(any(FieldInfo.class));
-
-    assertEquals(-99L, instance.getL());
-    assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
-    assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
-    assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-    assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-    assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
-    assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
-    assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
-    assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
-    assertThat(instance.getFloatSet(), hasItem(defaultFloatSupplier().apply(null)));
-  }
-
-  @Test
-  @SuppressWarnings({
-      "rawtypes", "unchecked"
-  })
-  public void shouldSelectTypeSettingSuppliersOverApplicationContext() {
-    Map<String, SampleSupplier> map = new Hashtable<>();
-
-    SampleSupplier<Long> longSupplier = Mockito.mock(SampleSupplier.class);
-    when(longSupplier.newInstance(any(FieldInfo.class))).thenReturn(99L);
-    when(longSupplier.getType()).thenReturn(long.class);
-    map.put("Long", longSupplier);
-
-    when(ctx.getBeansOfType(SampleSupplier.class)).thenReturn(map);
-
-    Primitives instance = Samples.of(Primitives.class)
-        .useApplicationContext(ctx)
-        .use(() -> -99L)
-        .forType(Long.class)
-        .newInstance();
-
-    assertEquals(-99L, instance.getL()); // Make sure the type setting was used here.
-    assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
-    assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
-    assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-    assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-    assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
-    assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
-    assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
-    assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
-    assertThat(instance.getFloatSet(), hasItem(defaultFloatSupplier().apply(null)));
-  }
-
   @Test
   public void shouldSelectPrimitiveTypeSettingOverWrapperTypeSetting() {
     // Make sure the test result is not affected of the order of configuration
@@ -253,8 +105,8 @@ public class SupplierHierarchyTest {
       assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
       assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
       assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-      assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-      assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
+      assertEquals(defaultDoubleSupplier().apply(null), instance.getD(), 0d);
+      assertEquals(defaultFloatSupplier().apply(null), instance.getF(), 0f);
       assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
       assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
       assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
@@ -272,8 +124,8 @@ public class SupplierHierarchyTest {
       assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
       assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
       assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-      assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-      assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
+      assertEquals(defaultDoubleSupplier().apply(null), instance.getD(), 0d);
+      assertEquals(defaultFloatSupplier().apply(null), instance.getF(), 0f);
       assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
       assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
       assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
@@ -297,8 +149,8 @@ public class SupplierHierarchyTest {
       assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
       assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
       assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-      assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-      assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
+      assertEquals(defaultDoubleSupplier().apply(null), instance.getD(), 0d);
+      assertEquals(defaultFloatSupplier().apply(null), instance.getF(), 0f);
       assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
       assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
       assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
@@ -316,8 +168,8 @@ public class SupplierHierarchyTest {
       assertEquals(defaultBooleanSupplier().apply(null), instance.isBool());
       assertEquals((byte) defaultByteSupplier().apply(null), instance.getB());
       assertEquals((char) defaultCharacterSupplier().apply(null), instance.getC());
-      assertEquals((double) defaultDoubleSupplier().apply(null), instance.getD(), 0d);
-      assertEquals((float) defaultFloatSupplier().apply(null), instance.getF(), 0f);
+      assertEquals(defaultDoubleSupplier().apply(null), instance.getD(), 0d);
+      assertEquals(defaultFloatSupplier().apply(null), instance.getF(), 0f);
       assertEquals((int) defaultIntegerSupplier().apply(null), instance.getI());
       assertEquals((short) defaultShortSupplier().apply(null), instance.getS());
       assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));

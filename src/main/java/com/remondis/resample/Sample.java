@@ -8,7 +8,6 @@ import static com.remondis.resample.ReflectionUtil.isPrimitiveCollection;
 import static com.remondis.resample.ReflectionUtil.isPrimitiveCompatible;
 import static com.remondis.resample.SampleException.valueSupplierException;
 import static java.util.Arrays.asList;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
@@ -23,8 +22,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import org.springframework.context.ApplicationContext;
 
 /**
  * The {@link Sample} class can generate instances of beans containing sample
@@ -50,9 +47,6 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   private boolean checkForNullFields = true;
 
-  private ApplicationContext context;
-  private Hashtable<Class<?>, SampleSupplier<?>> appCtxProviders;
-
   private Function<FieldInfo, Enum<?>> enumValueSupplier;
 
   private boolean useAutoSampling;
@@ -62,36 +56,10 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     this.type = type;
   }
 
-  private boolean hasApplicationContext() {
-    return nonNull(context);
-  }
-
-  /**
-   * Configures the {@link Sample} instance to use the Spring Application Context. Instances of {@link SampleSupplier}s
-   * in the app ctx will be registered to be used for their specified type.
-   * 
-   * @param context The application context
-   * @return Returns this object for method chaining.
-   */
-  @SuppressWarnings("rawtypes")
-  public Sample<T> useApplicationContext(ApplicationContext context) {
-    requireNonNull(context, "Application context must not be null!");
-    Map<String, SampleSupplier> beansOfType = context.getBeansOfType(SampleSupplier.class);
-    this.appCtxProviders = new Hashtable<Class<?>, SampleSupplier<?>>();
-    beansOfType.entrySet()
-        .stream()
-        .forEach(entry -> {
-          SampleSupplier supplier = entry.getValue();
-          appCtxProviders.putIfAbsent(supplier.getType(), supplier);
-        });
-    this.context = context;
-    return this;
-  }
-
   /**
    * Configures the {@link Sample} instance to use auto-sampling. The generator will then try to generate all transitive
    * object references by using the same instance of {@link Sample}.
-   * 
+   *
    * @return Returns this object for method chaining.
    */
   public Sample<T> useAutoSampling() {
@@ -100,11 +68,10 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   /**
-   * Configures the {@link Sample} instance to use auto-sampling. The generator will then try to generate all transitive
-   * object references by using the same instance of {@link Sample}. This helps to reduce configuration overhead when
-   * sampling Java Beans.
-   * 
-   * @return Returns this object for method chaining.
+   * Configures the specified {@link Sample} instance to be used by this {@link Sample}. The specified sampler will be
+   * used by type.
+   *
+   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
    */
   public <S> Sample<T> useSample(Sample<S> sample) {
     use((Supplier<S>) sample).forType(sample.getType());
@@ -114,7 +81,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   /**
    * Configures the {@link Supplier} to be used by this {@link Sample} instance. The scope in which this supplier is
    * used is defined on the object that is returned by this method.
-   * 
+   *
    * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
    */
   public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
@@ -129,7 +96,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
    * This method does the same as: <br/>
    * <code>this.use(sampleSupplier::newInstance).forType(sampleSupplier.getType());</code>
    * </p>
-   * 
+   *
    * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
    */
   public <S> Sample<T> use(SampleSupplier<S> sampleSupplier) {
@@ -141,11 +108,11 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   /**
    * Configures the {@link Function} to be used by this {@link Sample} instance. The scope in which this function is
    * used is defined on the object that is returned by this method.
-   * 
+   *
    * <p>
    * This method enables supplier implementations to get more information of the target field.
    * </p>
-   * 
+   *
    * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
    */
   public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
@@ -155,7 +122,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   /**
    * Configures a {@link Function} to be used as enum value supplier function.
-   * 
+   *
    * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
    */
   public Sample<T> useForEnum(Function<FieldInfo, Enum<?>> function) {
@@ -165,7 +132,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   /**
    * Activates a check to ensure that all Bean properties got a sample instance value after generation.
-   * 
+   *
    * @return Returns this object for method chaining.
    */
   public Sample<T> checkForNullFields() {
@@ -176,7 +143,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   /**
    * Deactivates the instance check: It is possible to skip fields in the sample configuration so no values will be
    * generated for them.
-   * 
+   *
    * @return Returns this object for method chaining.
    */
   public Sample<T> ignoreNullFields() {
@@ -192,6 +159,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     fieldSettings.put(propertyDescriptor, supplier);
   }
 
+  @Override
   public Class<T> getType() {
     return type;
   }
@@ -216,14 +184,11 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
       // Set all enum values
       Set<PropertyDescriptor> hitEnums = setAllEnumValues(newInstance);
-      // Execute all value providers available in Application Context
-      Set<PropertyDescriptor> hitByAppContext = setAllValuesByApplicationContextExcludingFieldSettings(newInstance);
       // Execute all type registered factories but skip the properties in the set of
       // field configurations.
       Set<PropertyDescriptor> hitByType = setAllValuesByTypeSettingsExcludingFieldSettings(newInstance);
       // Execute all the fieldConfigurations
       Set<PropertyDescriptor> hitByField = setAllValuesByFieldSettings(newInstance);
-      hitProperties.addAll(hitByAppContext);
       hitProperties.addAll(hitEnums);
       hitProperties.addAll(hitByType);
       hitProperties.addAll(hitByField);
@@ -263,10 +228,6 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     Sample<?> autoSample = Samples.of(type);
     autoSample.typeSettings = new Hashtable<>(this.typeSettings);
     autoSample.checkForNullFields = this.checkForNullFields;
-    autoSample.context = this.context;
-    if (nonNull(appCtxProviders)) {
-      autoSample.appCtxProviders = new Hashtable<>(this.appCtxProviders);
-    }
     autoSample.enumValueSupplier = this.enumValueSupplier;
     autoSample.useAutoSampling = this.useAutoSampling;
 
@@ -391,22 +352,6 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
         .collect(Collectors.toSet());
   }
 
-  private Set<PropertyDescriptor> setAllValuesByApplicationContextExcludingFieldSettings(T newInstance) {
-    if (hasApplicationContext()) {
-      return Properties.getProperties(type)
-          .stream()
-          .filter(pd -> {
-            return !fieldSettings.containsKey(pd);
-          })
-          .map(pd -> {
-            return setValueFromApplicationContext(newInstance, pd);
-          })
-          .collect(Collectors.toSet());
-    } else {
-      return Collections.emptySet();
-    }
-  }
-
   private Set<PropertyDescriptor> setAllValuesByTypeSettingsExcludingFieldSettings(T newInstance) {
     return Properties.getProperties(type)
         .stream()
@@ -425,29 +370,6 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
           return pd;
         })
         .collect(Collectors.toSet());
-  }
-
-  private PropertyDescriptor setValueFromApplicationContext(T newInstance, PropertyDescriptor pd) {
-    Class<?> propertyType = null;
-    if (isCollection(pd)) {
-      propertyType = getCollectionType(pd);
-    } else {
-      propertyType = pd.getPropertyType();
-    }
-    // If there is an exact match, take it
-    SampleSupplier<?> supplier = appCtxProviders.get(propertyType);
-    // If there was nothing found, check if a wrapper-supplier is registered for primitive types and if so, take that!
-    if (isNull(supplier) && propertyType.isPrimitive()) {
-      Class<?> wrapperType = ReflectionUtil.wrap(propertyType);
-      supplier = appCtxProviders.get(wrapperType);
-    }
-
-    if (isNull(supplier)) {
-      return null;
-    } else {
-      setValue(pd, newInstance, supplier::newInstance);
-      return pd;
-    }
   }
 
   private void setValueFromTypeSetting(T newInstance, PropertyDescriptor pd) {

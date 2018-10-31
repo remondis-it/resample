@@ -9,7 +9,7 @@ public class FieldInfo {
   private String propertyName;
   private Class<?> type;
 
-  FieldInfo(String propertyName, Class<?> type) {
+  protected FieldInfo(String propertyName, Class<?> type) {
     super();
     this.propertyName = propertyName;
     this.type = type;

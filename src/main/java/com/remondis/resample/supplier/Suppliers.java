@@ -1,9 +1,11 @@
 package com.remondis.resample.supplier;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
@@ -25,12 +27,21 @@ public class Suppliers {
   @SuppressWarnings("unchecked")
   public static <T> Function<FieldInfo, T> enumValueSupplier() {
     return (fi) -> {
-      return (T) fi.getType()
-          .getEnumConstants()[0];
+      Object[] enumConstants = fi.getType()
+          .getEnumConstants();
+      if (isNull(enumConstants)) {
+        throw new IllegalAccessError("Cannot supply enum value from non-enum type: " + fi.getType()
+            .getName());
+      } else {
+        return (T) enumConstants[0];
+      }
     };
   }
 
   /**
+   * @param year
+   * @param month
+   * @param dayOfMonth
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
    *         <li>If the field name contains the word 'from' yesterday is returned
@@ -39,16 +50,16 @@ public class Suppliers {
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
-  public static Function<FieldInfo, LocalDate> localDateSupplier() {
+  public static Function<FieldInfo, LocalDate> localDateSupplier(int year, int month, int dayOfMonth) {
     return (info) -> {
       if (isPeriodStartField(info)) {
-        return LocalDate.now()
+        return LocalDate.of(year, month, dayOfMonth)
             .minus(1, ChronoUnit.DAYS);
       } else if (isPeriodEndField(info)) {
-        return LocalDate.now()
+        return LocalDate.of(year, month, dayOfMonth)
             .plus(1, ChronoUnit.DAYS);
       } else {
-        return LocalDate.now();
+        return LocalDate.of(year, month, dayOfMonth);
       }
     };
   }
@@ -62,9 +73,60 @@ public class Suppliers {
    *         {@link Date}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
-  public static Function<FieldInfo, Date> dateSupplier() {
+  public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
+      int second, int millis) {
     final Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.YEAR, year);
+    cal.set(Calendar.MONTH, month);
+    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+    cal.set(Calendar.MINUTE, minute);
+    cal.set(Calendar.SECOND, second);
+    cal.set(Calendar.MILLISECOND, millis);
+    return _dateSupplier(cal.getTime());
+  }
+
+  public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay) {
+    final Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.YEAR, year);
+    cal.set(Calendar.MONTH, month);
+    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
+    return _dateSupplier(cal.getTime());
+  }
+
+  public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute) {
+    final Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.YEAR, year);
+    cal.set(Calendar.MONTH, month);
+    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+    cal.set(Calendar.MINUTE, minute);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
+    return _dateSupplier(cal.getTime());
+  }
+
+  public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
+      int second) {
+    final Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.YEAR, year);
+    cal.set(Calendar.MONTH, month);
+    cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+    cal.set(Calendar.MINUTE, minute);
+    cal.set(Calendar.SECOND, second);
+    cal.set(Calendar.MILLISECOND, 0);
+    return _dateSupplier(cal.getTime());
+  }
+
+  private static Function<FieldInfo, Date> _dateSupplier(final Date time) {
     return (info) -> {
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(time);
       if (isPeriodStartField(info)) {
         cal.add(Calendar.DATE, -1);
         return new Date(cal.getTime()
@@ -95,11 +157,12 @@ public class Suppliers {
         .contains(pattern.toLowerCase());
   }
 
-  public static Function<FieldInfo, TimeZone> timeZoneSupplier() {
-    return fi -> TimeZone.getTimeZone("Europe/Berlin");
+  public static Function<FieldInfo, TimeZone> timeZoneSupplier(String zoneId) {
+    return fi -> TimeZone.getTimeZone(zoneId);
   }
 
   /**
+   * @param zone
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
    *         <li>If the field name contains the word 'from' yesterday is returned
@@ -108,10 +171,11 @@ public class Suppliers {
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
-  public static Function<FieldInfo, ZonedDateTime> zonedDateTimeSupplier() {
+  public static Function<FieldInfo, ZonedDateTime> zonedDateTimeSupplier(int year, int month, int dayOfMonth, int hour,
+      int minute, int second, int nanoOfSecond, ZoneId zone) {
     return (info) -> {
       if (isPeriodStartField(info)) {
-        return ZonedDateTime.now()
+        return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
             .minus(1, ChronoUnit.DAYS);
       } else if (isPeriodEndField(info)) {
         return ZonedDateTime.now()
