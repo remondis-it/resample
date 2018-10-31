@@ -33,8 +33,8 @@
     </properties>
     <distributionManagement>
         <repository>
-            <id>bintray-schuettec-maven</id>
-            <name>schuettec-maven</name>
+            <id>bintray-maven</id>
+            <name>maven</name>
             <url>https://api.bintray.com/maven/schuettec/maven/com.remondis.resample/;publish=1</url>
         </repository>
     </distributionManagement>
@@ -341,12 +341,12 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.55</minimum>
+                                            <minimum>0.53</minimum>
                                         </limit>
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.83</minimum>
+                                            <minimum>0.82</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

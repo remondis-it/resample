@@ -9,8 +9,8 @@ cat <<EOF > ~/.m2/settings.xml
                           https://maven.apache.org/xsd/settings-1.0.0.xsd">
 	<servers>
 		<server>
-			<id>bintray-schuettec-maven</id>
-			<username>schuettec</username>
+			<id>bintray-maven</id>
+			<username>${BINTRAY_USER}</username>
 			<password>${BINTRAY_API_KEY}</password>
 		</server>
 	</servers>
