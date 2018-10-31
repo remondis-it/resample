@@ -35,7 +35,7 @@
         <repository>
             <id>bintray-schuettec-maven</id>
             <name>schuettec-maven</name>
-            <url>https://api.bintray.com/maven/schuettec/maven/com.remondis.example/;publish=1</url>
+            <url>https://api.bintray.com/maven/schuettec/maven/com.remondis.resample/;publish=1</url>
         </repository>
     </distributionManagement>
     <build>
@@ -472,4 +472,5 @@
             <artifactId>powermock-api-mockito</artifactId>
         </dependency>
     </dependencies>
+    <description>A Java Bean fixture generator.</description>
 </project>
