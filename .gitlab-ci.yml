@@ -1,0 +1,80 @@
+# This template uses the java:8 docker image because there isn't any
+# official Gradle image at this moment
+#
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+image: java:8-jdk
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - build
+  - test
+  - publish
+
+before_script:
+#  - echo `pwd` # debug
+#  - echo "$CI_BUILD_NAME, $CI_BUILD_REF_NAME $CI_BUILD_STAGE" # debug
+  - chmod +x gradlew
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+  - export http_proxy=http://remondis-de%5CDE9899-Proxy:PasswordSwordfish9899@proxy.remondis.local:80/
+  - export https_proxy=http://remondis-de%5CDE9899-Proxy:PasswordSwordfish9899@proxy.remondis.local:80/
+  - export ORG_GRADLE_PROJECT_nexus_user_name=${RENEW_NEXUS_USER_NAME}
+  - export ORG_GRADLE_PROJECT_nexus_user_pwd=${RENEW_NEXUS_USER_PWD}
+
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+    - .m2/repository/
+
+build:
+  stage: build
+  script:
+    - ./gradlew clean assemble
+  allow_failure: false
+
+test:
+  stage: test
+  script:
+    - ./gradlew check
+    - "INSTRUCTION_COVERAGE=$(grep -oP '(Total.*?)\\K[0-9]{1,3}%' ./build/reports/coverage/index.html)"
+    - "BRANCH_COVERAGE=$(grep -oP '(Total.*?)[0-9]{1,3}%.*?\\K[0-9]{1,3}%' ./build/reports/coverage/index.html)"
+    - 'echo "Instruction Coverage:$INSTRUCTION_COVERAGE"'
+    - 'echo "Branch Coverage:$BRANCH_COVERAGE"'
+  coverage: '/^Instruction Coverage:(\d+)%$/'
+  artifacts:
+    paths:
+      - build/reports/
+      - build/jacoco/
+    expire_in: 1 day
+    when: always
+
+publish:
+  stage: publish
+  script:
+    - ./gradlew publish
+  only:
+    - master
+    - develop
+
+sonarqube:
+  image: java:8-jdk
+  stage: publish
+  tags:
+    - java
+  script:
+    - ./gradlew sonarqube -Dsonar.host.url=$sonarHost -Dsonar.login=$sonarLogin
+  allow_failure: true
+  only:
+    - master
+    - develop
+
+after_script:
+  - echo "End CI"
