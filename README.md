@@ -1,8 +1,11 @@
 # ReSample - A Test Fixture Generator
 
 # Table of Contents
-1. Overview
-2. Features
+1. [Overview](#overview)
+2. [Features](#features)
+3. [How to use](#how-to-use)
+4. [Scope hierarchy](#scope-hierarchy)
+5. [Auto-sampling](#auto-sampling)
 
 ## Overview
 
