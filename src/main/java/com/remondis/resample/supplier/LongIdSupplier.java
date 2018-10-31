@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FunctionSupplier;
+import com.remondis.resample.SampleSupplier;
 
 /**
  * A supplier implementation that generates {@link Long} values. This supplier uses the
@@ -15,8 +16,12 @@ import com.remondis.resample.FunctionSupplier;
  */
 public class LongIdSupplier extends FunctionSupplier<Long> {
 
-  public LongIdSupplier() {
+  LongIdSupplier() {
     super(Long.class, longIdSupplier());
+  }
+
+  public static SampleSupplier<Long> longIdSampleSupplier() {
+    return new LongIdSupplier();
   }
 
   public static Function<FieldInfo, Long> longIdSupplier() {

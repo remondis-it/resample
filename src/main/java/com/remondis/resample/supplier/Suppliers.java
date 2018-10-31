@@ -181,7 +181,7 @@ public class Suppliers {
         return ZonedDateTime.now()
             .plus(1, ChronoUnit.DAYS);
       } else {
-        return ZonedDateTime.now();
+        return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone);
       }
     };
   }

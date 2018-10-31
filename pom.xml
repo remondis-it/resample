@@ -8,9 +8,6 @@
     <version>0.0.1</version>
     <packaging>jar</packaging>
     <name>ReSample</name>
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -44,6 +41,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
@@ -86,6 +88,16 @@
                             </manifest>
                         </archive>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -221,6 +233,13 @@
                                     <excludes>
                                         <exclude>com.remondis.resample.ReflectionException</exclude>
                                         <exclude>com.remondis.resample.SampleException</exclude>
+                                        <exclude>com.remondis.resample.Sample</exclude>
+                                        <exclude>com.remondis.resample.Samples</exclude>
+                                        <exclude>com.remondis.resample.SampleService</exclude>
+                                        <exclude>com.remondis.resample.Properties</exclude>
+                                        <exclude>com.remondis.resample.SettingBuilder</exclude>
+                                        <exclude>com.remondis.resample.ReflectionUtil</exclude>
+                                        <exclude>com.remondis.resample.supplier.Suppliers</exclude>
                                     </excludes>
                                     <element>CLASS</element>
                                     <limits>
@@ -236,6 +255,120 @@
                                         </limit>
                                     </limits>
                                 </rule>
+
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.Sample</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.91</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.86</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.Properties</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.66</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.38</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+
+
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.Properties</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.66</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.38</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.SettingBuilder</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.97</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.ReflectionUtil</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.55</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.83</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.supplier.Suppliers</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.62</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+
                             </rules>
                         </configuration>
                     </execution>

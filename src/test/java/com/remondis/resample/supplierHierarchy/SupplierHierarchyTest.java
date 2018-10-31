@@ -1,5 +1,6 @@
 package com.remondis.resample.supplierHierarchy;
 
+import static com.remondis.resample.supplier.LongIdSupplier.longIdSampleSupplier;
 import static com.remondis.resample.supplier.Suppliers.defaultBooleanSupplier;
 import static com.remondis.resample.supplier.Suppliers.defaultByteSupplier;
 import static com.remondis.resample.supplier.Suppliers.defaultCharacterSupplier;
@@ -9,6 +10,9 @@ import static com.remondis.resample.supplier.Suppliers.defaultIntegerSupplier;
 import static com.remondis.resample.supplier.Suppliers.defaultLongSupplier;
 import static com.remondis.resample.supplier.Suppliers.defaultShortSupplier;
 import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
+import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
+import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
+import static com.remondis.resample.supplier.Suppliers.oneIntegerSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
@@ -16,11 +20,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.Test;
 
+import com.remondis.resample.Sample;
 import com.remondis.resample.Samples;
 
 public class SupplierHierarchyTest {
+
+  @Test
+  public void shouldDenyNullFields() {
+    assertThatThrownBy(() -> {
+      Samples.of(Enums.class)
+          .ignoreNullFields()
+          .checkForNullFields()
+          .newInstance();
+    }).hasMessageContaining("The following properties were not covered by the sample generator:");
+  }
 
   @Test
   public void shouldDefaultToDenyNullFields() {
@@ -131,6 +149,49 @@ public class SupplierHierarchyTest {
       assertThat(instance.getFloatList(), hasItem(defaultFloatSupplier().apply(null)));
       assertThat(instance.getFloatSet(), hasItem(defaultFloatSupplier().apply(null)));
     }
+  }
+
+  @Test
+  public void sampleInstancesShouldOverrideTypeSetting() {
+    Sample<Person> personSamples = Samples.of(Person.class)
+        .useForEnum(enumValueSupplier())
+        .use(fieldNameStringSupplier())
+        .forType(String.class)
+        .use(localDateSupplier(2018, 10, 29))
+        .forType(LocalDate.class);
+    Family family = Samples.of(Family.class)
+        .use(Person::new)
+        .forType(Person.class)
+        .useSample(personSamples)
+        .newInstance();
+    List<Person> persons = family.getPersons();
+    assertEquals(1, persons.size());
+    Person person = persons.get(0);
+    assertEquals("name", person.getName());
+  }
+
+  @Test
+  public void sampleSampleSupplierShouldOverrideTypeSetting() {
+    Sample<Person> personSamples = Samples.of(Person.class)
+        .useForEnum(enumValueSupplier())
+        .use(fieldNameStringSupplier())
+        .forType(String.class)
+        .use(localDateSupplier(2018, 10, 29))
+        .forType(LocalDate.class)
+        .use(oneIntegerSupplier())
+        .forType(int.class)
+        .use(longIdSampleSupplier());
+
+    Family family = Samples.of(Family.class)
+        .use(Person::new)
+        .forType(Person.class)
+        .useSample(personSamples)
+        .newInstance();
+    List<Person> persons = family.getPersons();
+    assertEquals(1, persons.size());
+    Person person = persons.get(0);
+    assertEquals("name", person.getName());
+    assertEquals(1, person.getAge());
   }
 
   @Test
