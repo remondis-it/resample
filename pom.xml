@@ -8,6 +8,7 @@
     <version>0.0.1</version>
     <packaging>jar</packaging>
     <name>ReSample</name>
+    <url>https://github.com/remondis-it/resample</url>
     <scm>
         <connection>scm:git:https://github.com/remondis-it/resample.git</connection>
         <developerConnection>scm:git:git@github.com:remondis-it/resample.git</developerConnection>
