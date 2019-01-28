@@ -225,6 +225,8 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       type = pd.getPropertyType();
     }
 
+    denyNoDefaultConstructor(type);
+
     Sample<?> autoSample = Samples.of(type);
     autoSample.typeSettings = new Hashtable<>(this.typeSettings);
     autoSample.checkForNullFields = this.checkForNullFields;
@@ -245,6 +247,14 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     }
     return true;
 
+  }
+
+  private void denyNoDefaultConstructor(Class<?> type) {
+    try {
+      type.getConstructor();
+    } catch (NoSuchMethodException | SecurityException e) {
+      throw SampleException.noDefaultConstructor(type);
+    }
   }
 
   private static <T> T createNewInstance(Class<T> type)

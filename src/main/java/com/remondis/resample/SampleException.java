@@ -9,7 +9,7 @@ import java.util.List;
 public class SampleException extends RuntimeException {
 
   /**
-   * 
+   *
    */
   private static final long serialVersionUID = 1L;
 
@@ -62,6 +62,11 @@ public class SampleException extends RuntimeException {
                 .getName(),
             autoSample),
         e);
+  }
+
+  static SampleException noDefaultConstructor(Class<?> type) {
+    return new SampleException(String
+        .format("Cannot create instance of type '%s': No or not accessible default constructor.", type.getName()));
   }
 
 }
