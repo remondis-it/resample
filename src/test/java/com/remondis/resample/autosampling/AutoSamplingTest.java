@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.Test;
 
-import com.remondis.resample.SampleException;
+import com.remondis.resample.AutoSamplingException;
 import com.remondis.resample.Samples;
 
 public class AutoSamplingTest {
@@ -13,9 +13,9 @@ public class AutoSamplingTest {
   public void shouldFailAutosampling() {
     assertThatThrownBy(() -> Samples.of(Data.class)
         .useAutoSampling()
-        .get()).isInstanceOf(SampleException.class)
+        .get()).isInstanceOf(AutoSamplingException.class)
             .hasMessage(
-                "Cannot create instance of type 'java.math.BigDecimal': No or not accessible default constructor.");
+                "Auto-sampling failed for type java.math.BigDecimal accessed by getId() in type 'com.remondis.resample.autosampling.Data'.");
   }
 
 }
