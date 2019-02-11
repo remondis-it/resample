@@ -1,6 +1,5 @@
 package com.remondis.resample;
 
-import java.beans.PropertyDescriptor;
 import java.util.List;
 
 /**
@@ -50,18 +49,6 @@ public class SampleException extends RuntimeException {
 
   static SampleException valueSupplierException(Throwable e) {
     return new SampleException("A value supplier function threw an exception.", e);
-  }
-
-  static SampleException autoSamplingFailed(PropertyDescriptor pd, Sample<?> autoSample, Exception e) {
-    return new SampleException(
-        String.format("Auto-sampling failed for property '%s' ('%s') in type '%s' and configuration:\n%s", pd.getName(),
-            pd.getReadMethod()
-                .getName(),
-            pd.getReadMethod()
-                .getDeclaringClass()
-                .getName(),
-            autoSample),
-        e);
   }
 
   static SampleException noDefaultConstructor(Class<?> type) {

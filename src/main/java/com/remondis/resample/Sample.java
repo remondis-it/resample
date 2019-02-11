@@ -243,7 +243,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     try {
       setValue(pd, newInstance, supplier);
     } catch (Exception e) {
-      throw SampleException.autoSamplingFailed(pd, autoSample, e);
+      throw AutoSamplingException.autoSamplingFailed(pd, autoSample, e);
     }
     return true;
 
