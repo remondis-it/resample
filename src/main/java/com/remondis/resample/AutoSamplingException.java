@@ -2,7 +2,7 @@ package com.remondis.resample;
 
 import java.beans.PropertyDescriptor;
 
-public class AutoSamplingException extends Exception {
+public class AutoSamplingException extends RuntimeException {
 
   private AutoSamplingException(String message, Throwable cause) {
     super(message, cause);
