@@ -2,6 +2,7 @@ language: java
 script: mvn install
 
 before_install:
+- chmod +x ./etc/before.sh
 - ./etc/before.sh
 
 deploy:
