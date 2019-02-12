@@ -4,6 +4,8 @@ import java.beans.PropertyDescriptor;
 
 public class AutoSamplingException extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   private AutoSamplingException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -12,7 +14,7 @@ public class AutoSamplingException extends RuntimeException {
     return new AutoSamplingException(String.format("Auto-sampling failed for type %s accessed by %s() in type '%s'.",
         pd.getReadMethod()
             .getReturnType()
-            .getName(),
+            .getCanonicalName(),
         pd.getReadMethod()
             .getName(),
         pd.getReadMethod()

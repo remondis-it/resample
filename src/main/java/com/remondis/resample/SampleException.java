@@ -52,8 +52,8 @@ public class SampleException extends RuntimeException {
   }
 
   static SampleException noDefaultConstructor(Class<?> type) {
-    return new SampleException(String
-        .format("Cannot create instance of type '%s': No or not accessible default constructor.", type.getName()));
+    return new SampleException(String.format(
+        "Cannot create instance of type '%s': No or not accessible default constructor.", type.getCanonicalName()));
   }
 
 }

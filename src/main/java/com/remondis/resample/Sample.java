@@ -261,6 +261,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
         Function<FieldInfo, ?> supplier = typeSettings.get(type);
         return supplier.apply(fi);
       } else if (useAutoSampling) {
+        @SuppressWarnings("rawtypes")
         Sample autoSampleSupplier = createAutoSampling(pd, type);
         return autoSampleSupplier.newInstance();
       } else {
@@ -301,6 +302,8 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
     try {
       setValue(pd, newInstance, supplier);
+    } catch (AutoSamplingException e) {
+      throw e;
     } catch (Exception e) {
       throw AutoSamplingException.autoSamplingFailed(pd, e);
     }
@@ -486,6 +489,8 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     Object value;
     try {
       value = supplier.apply(fieldInfo);
+    } catch (AutoSamplingException e) {
+      throw e;
     } catch (Throwable e) {
       throw valueSupplierException(e);
     }
