@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.remondis</groupId>
     <artifactId>resample</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
     <name>ReSample</name>
     <url>https://github.com/remondis-it/resample</url>
@@ -246,6 +246,8 @@
                                         <exclude>com.remondis.resample.SettingBuilder</exclude>
                                         <exclude>com.remondis.resample.ReflectionUtil</exclude>
                                         <exclude>com.remondis.resample.supplier.Suppliers</exclude>
+                                        <exclude>com.remondis.resample.AutoSamplingException</exclude>
+                                        <exclude>com.remondis.resample.Samples.Default</exclude>
                                     </excludes>
                                     <element>CLASS</element>
                                     <limits>

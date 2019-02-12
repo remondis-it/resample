@@ -200,6 +200,8 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       return newInstance;
     } catch (SampleException e) {
       throw e;
+    } catch (AutoSamplingException e) {
+      throw e;
     } catch (Exception e) {
       throw ReflectionException.newInstanceFailed(type, e);
     }
@@ -218,11 +220,18 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   private boolean setValueByAutoSampling(PropertyDescriptor pd, T newInstance) {
+
     Class<?> type = null;
     if (isCollection(pd)) {
       type = getCollectionType(pd);
     } else {
       type = pd.getPropertyType();
+    }
+
+    try {
+      denyNoDefaultConstructor(type);
+    } catch (Exception e) {
+      throw AutoSamplingException.autoSamplingFailed(pd, e);
     }
 
     Sample<?> autoSample = Samples.of(type);
@@ -241,10 +250,17 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     try {
       setValue(pd, newInstance, supplier);
     } catch (Exception e) {
-      throw SampleException.autoSamplingFailed(pd, autoSample, e);
+      throw AutoSamplingException.autoSamplingFailed(pd, e);
     }
     return true;
+  }
 
+  private void denyNoDefaultConstructor(Class<?> type) {
+    try {
+      type.getConstructor();
+    } catch (NoSuchMethodException | SecurityException e) {
+      throw SampleException.noDefaultConstructor(type);
+    }
   }
 
   private static <T> T createNewInstance(Class<T> type)
