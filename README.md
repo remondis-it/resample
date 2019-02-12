@@ -59,6 +59,7 @@ ReSample provides the following features to create test data fixtures:
 - Factories can be obtained by
   - configuration builder
   - other Sample-instances
+- Lists and Maps are supported
 - Auto-sampling: Applies a configuration recursively to reduce configuration overhead.
 - Ready to use suppliers are shipped with this library
   - `LocalDate` supplier
@@ -96,8 +97,10 @@ ReSample defines a scope hierarchy that is used when applying value factories:
 
 1. all primitive fields and lists (of respective wrapper types) are filled with default values.
 2. all enumeration fields and lists are filled using the global enumeration value supplier
-4. all fields and lists are filled using the suppliers registered for types
-5. all configured fields are filled using the specified supplier
+3. all fields and lists are filled using the suppliers registered for types
+4. all configured fields are filled using the specified supplier
+5. all fields holding maps are filled using the specified type and enum suppliers
+6. all non-hit fields are processed by auto-sampling (if active)
 
 ### Auto-sampling
 
