@@ -15,6 +15,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
@@ -189,10 +191,16 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       Set<PropertyDescriptor> hitByType = setAllValuesByTypeSettingsExcludingFieldSettings(newInstance);
       // Execute all the fieldConfigurations
       Set<PropertyDescriptor> hitByField = setAllValuesByFieldSettings(newInstance);
+
       hitProperties.addAll(hitEnums);
       hitProperties.addAll(hitByType);
       hitProperties.addAll(hitByField);
 
+      // Sample all non-hit Maps
+      Set<PropertyDescriptor> hitByMaps = setAllValuesByMapSampling(hitProperties, newInstance);
+      hitProperties.addAll(hitByMaps);
+
+      // Autosample non-hit fields
       Set<PropertyDescriptor> hitByAutoSampling = setAllValuesByAutoSampling(hitProperties, newInstance);
       hitProperties.addAll(hitByAutoSampling);
 
@@ -204,6 +212,60 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       throw e;
     } catch (Exception e) {
       throw ReflectionException.newInstanceFailed(type, e);
+    }
+  }
+
+  private Set<PropertyDescriptor> setAllValuesByMapSampling(Set<PropertyDescriptor> hitProperties, T newInstance) {
+    Set<PropertyDescriptor> notHitFields = getNotHitFields(hitProperties);
+    Set<PropertyDescriptor> hitFields = notHitFields.stream()
+        .filter(pd -> Map.class.isAssignableFrom(pd.getPropertyType()))
+        .filter(pd -> setValueByMapSampling(pd, newInstance))
+        .collect(Collectors.toSet());
+    return hitFields;
+  }
+
+  @SuppressWarnings({
+      "rawtypes", "unchecked"
+  })
+  private boolean setValueByMapSampling(PropertyDescriptor pd, T newInstance) {
+
+    ParameterizedType pt = (ParameterizedType) pd.getReadMethod()
+        .getGenericReturnType();
+    Type[] actualTypeArguments = pt.getActualTypeArguments();
+
+    Map newMap = new Hashtable();
+    Class<?> keyType = (Class<?>) actualTypeArguments[0];
+    Class<?> valueType = (Class<?>) actualTypeArguments[1];
+    Object key = sampleMapItem(pd, keyType);
+    Object value = sampleMapItem(pd, valueType);
+
+    if (nonNull(key) && nonNull(value)) {
+      newMap.put(key, value);
+      setValue(pd, newInstance, fi -> newMap);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private Object sampleMapItem(PropertyDescriptor pd, Class<?> type) {
+    FieldInfo fi = new FieldInfo(pd.getName(), type);
+    if (type.isEnum()) {
+      if (nonNull(enumValueSupplier)) {
+        return enumValueSupplier.apply(fi);
+      } else {
+        return null;
+      }
+    } else {
+      if (typeSettings.containsKey(type)) {
+        Function<FieldInfo, ?> supplier = typeSettings.get(type);
+        return supplier.apply(fi);
+      } else if (useAutoSampling) {
+        Sample autoSampleSupplier = createAutoSampling(pd, type);
+        return autoSampleSupplier.newInstance();
+      } else {
+        return null;
+      }
     }
   }
 
@@ -228,17 +290,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       type = pd.getPropertyType();
     }
 
-    try {
-      denyNoDefaultConstructor(type);
-    } catch (Exception e) {
-      throw AutoSamplingException.autoSamplingFailed(pd, e);
-    }
-
-    Sample<?> autoSample = Samples.of(type);
-    autoSample.typeSettings = new Hashtable<>(this.typeSettings);
-    autoSample.checkForNullFields = this.checkForNullFields;
-    autoSample.enumValueSupplier = this.enumValueSupplier;
-    autoSample.useAutoSampling = this.useAutoSampling;
+    Sample<?> autoSample = createAutoSampling(pd, type);
 
     Function<FieldInfo, ?> supplier = null;
     if (isCollection(pd)) {
@@ -253,6 +305,22 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       throw AutoSamplingException.autoSamplingFailed(pd, e);
     }
     return true;
+  }
+
+  private <S> Sample<S> createAutoSampling(PropertyDescriptor pd, Class<S> type) {
+    try {
+      denyNoDefaultConstructor(type);
+    } catch (Exception e) {
+      throw AutoSamplingException.autoSamplingFailed(pd, e);
+    }
+
+    Sample<S> autoSample = Samples.of(type);
+    autoSample.typeSettings = new Hashtable<>(this.typeSettings);
+    autoSample.checkForNullFields = this.checkForNullFields;
+    autoSample.enumValueSupplier = this.enumValueSupplier;
+    autoSample.useAutoSampling = this.useAutoSampling;
+
+    return autoSample;
   }
 
   private void denyNoDefaultConstructor(Class<?> type) {
@@ -277,9 +345,6 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
           .filter(pd -> {
             Class<?> propertyType = pd.getPropertyType();
             return propertyType.isEnum() || (isCollection(propertyType) && getCollectionType(pd).isEnum());
-          })
-          .filter(pd -> {
-            return !fieldSettings.containsKey(pd);
           })
           .filter(pd -> {
             return !fieldSettings.containsKey(pd);
@@ -313,14 +378,24 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       Set<PropertyDescriptor> properties = getNotHitFields(hitProperties);
       if (!properties.isEmpty()) {
         String message = properties.stream()
-            .map(PropertyDescriptor::getName)
+            // .map(PropertyDescriptor::getName)
             .collect(
                 () -> new StringBuilder(
                     "The following properties were not covered by the sample generator:\nFor class '")
                         .append(type.getName())
                         .append("'\n"),
-                (acc, str) -> acc.append("- ")
-                    .append(str)
+                (acc, pd) -> acc.append("- ")
+                    .append(pd.getName())
+                    .append(", accessed by ")
+                    .append(pd.getPropertyType()
+                        .getName())
+                    .append(" ")
+                    .append(pd.getReadMethod()
+                        .getName())
+                    .append("()")
+                    .append(", class: ")
+                    .append(pd.getReadMethod()
+                        .getDeclaringClass())
                     .append("\n"),
                 (sb1, sb2) -> sb1.append(sb2.toString()))
             .toString();
