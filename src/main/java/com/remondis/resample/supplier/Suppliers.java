@@ -196,6 +196,30 @@ public class Suppliers {
   }
 
   /**
+   * @return Returning a sample supplier returning the fully-quallified field name as string.
+   */
+  public static Function<FieldInfo, String> fullyQualifiedFieldNameStringSupplier() {
+    return (fi) -> {
+      return String.format("%s.%s", fi.getProperty()
+          .getReadMethod()
+          .getDeclaringClass()
+          .getName(), fi.getPropertyName());
+    };
+  }
+
+  /**
+   * @return Returning a sample supplier returning the field name as string with the declaring class' simple name.
+   */
+  public static Function<FieldInfo, String> shortQualifiedFieldNameStringSupplier() {
+    return (fi) -> {
+      return String.format("%s.%s", fi.getProperty()
+          .getReadMethod()
+          .getDeclaringClass()
+          .getSimpleName(), fi.getPropertyName());
+    };
+  }
+
+  /**
    * @return Returning a sample supplier returning the field name as string.
    */
   public static Function<FieldInfo, String> fieldNameStringSupplier() {

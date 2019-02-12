@@ -11,7 +11,7 @@ public class FieldInfo {
   private PropertyDescriptor property;
   private Class<?> type;
 
-  protected FieldInfo(PropertyDescriptor pd, Class<?> type) {
+  public FieldInfo(PropertyDescriptor pd, Class<?> type) {
     super();
     this.property = pd;
     this.type = type;

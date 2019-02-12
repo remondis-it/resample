@@ -6,6 +6,9 @@ import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -151,6 +154,22 @@ public class SuppliersTest {
     String expected = "propertyName";
     String actual = f.apply(new FieldInfoImpl(expected, String.class));
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldReturnFullyQualifiedFieldName() throws IntrospectionException {
+    Function<FieldInfo, String> f = Suppliers.fullyQualifiedFieldNameStringSupplier();
+    PropertyDescriptor pd = new PropertyDescriptor("number", Dummy.class);
+    String string = f.apply(new FieldInfo(pd, BigDecimal.class));
+    assertEquals("com.remondis.resample.supplier.Dummy.number", string);
+  }
+
+  @Test
+  public void shouldReturnShortQualifiedFieldName() throws IntrospectionException {
+    Function<FieldInfo, String> f = Suppliers.shortQualifiedFieldNameStringSupplier();
+    PropertyDescriptor pd = new PropertyDescriptor("number", Dummy.class);
+    String string = f.apply(new FieldInfo(pd, BigDecimal.class));
+    assertEquals("Dummy.number", string);
   }
 
 }
