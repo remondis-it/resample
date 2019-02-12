@@ -22,7 +22,7 @@ public class Samples {
   /**
    * Provides access to a pre-configured {@link Sample} configuration.
    */
-  static class Default {
+  public static class Default {
 
     /**
      * Creates a new {@link Sample} of the specified type using a default configuration.
