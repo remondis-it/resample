@@ -251,7 +251,11 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   private Object sampleMapItem(PropertyDescriptor pd, Class<?> type) {
     FieldInfo fi = new FieldInfo(pd.getName(), type);
     if (type.isEnum()) {
-      return enumValueSupplier.apply(fi);
+      if (nonNull(enumValueSupplier)) {
+        return enumValueSupplier.apply(fi);
+      } else {
+        return null;
+      }
     } else {
       if (typeSettings.containsKey(type)) {
         Function<FieldInfo, ?> supplier = typeSettings.get(type);
@@ -374,14 +378,24 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
       Set<PropertyDescriptor> properties = getNotHitFields(hitProperties);
       if (!properties.isEmpty()) {
         String message = properties.stream()
-            .map(PropertyDescriptor::getName)
+            // .map(PropertyDescriptor::getName)
             .collect(
                 () -> new StringBuilder(
                     "The following properties were not covered by the sample generator:\nFor class '")
                         .append(type.getName())
                         .append("'\n"),
-                (acc, str) -> acc.append("- ")
-                    .append(str)
+                (acc, pd) -> acc.append("- ")
+                    .append(pd.getName())
+                    .append(", accessed by ")
+                    .append(pd.getPropertyType()
+                        .getName())
+                    .append(" ")
+                    .append(pd.getReadMethod()
+                        .getName())
+                    .append("()")
+                    .append(", class: ")
+                    .append(pd.getReadMethod()
+                        .getDeclaringClass())
                     .append("\n"),
                 (sb1, sb2) -> sb1.append(sb2.toString()))
             .toString();
