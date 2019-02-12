@@ -1,17 +1,19 @@
 package com.remondis.resample;
 
+import java.beans.PropertyDescriptor;
+
 /**
  * Contains some information about the field for which sample data should be
  * generated.
  */
 public class FieldInfo {
 
-  private String propertyName;
+  private PropertyDescriptor property;
   private Class<?> type;
 
-  protected FieldInfo(String propertyName, Class<?> type) {
+  protected FieldInfo(PropertyDescriptor pd, Class<?> type) {
     super();
-    this.propertyName = propertyName;
+    this.property = pd;
     this.type = type;
   }
 
@@ -19,7 +21,14 @@ public class FieldInfo {
    * @return Returns the simple property name of the field.
    */
   public String getPropertyName() {
-    return propertyName;
+    return property.getName();
+  }
+
+  /**
+   * @return Returns the {@link PropertyDescriptor} of the field.
+   */
+  public PropertyDescriptor getProperty() {
+    return property;
   }
 
   /**

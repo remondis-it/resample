@@ -249,7 +249,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   private Object sampleMapItem(PropertyDescriptor pd, Class<?> type) {
-    FieldInfo fi = new FieldInfo(pd.getName(), type);
+    FieldInfo fi = new FieldInfo(pd, type);
     if (type.isEnum()) {
       if (nonNull(enumValueSupplier)) {
         return enumValueSupplier.apply(fi);
@@ -370,7 +370,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   private Function<FieldInfo, ?> wrapInList(PropertyDescriptor pd, Function<FieldInfo, ?> supplier) {
     return (fi) -> {
       Class<?> collectionType = getCollectionType(pd);
-      return asList(supplier.apply(new FieldInfo(pd.getName(), collectionType))).stream()
+      return asList(supplier.apply(new FieldInfo(pd, collectionType))).stream()
           .collect(getCollector(pd.getPropertyType()));
 
     };
@@ -485,7 +485,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   }
 
   private void setValue(PropertyDescriptor pd, T newInstance, Function<FieldInfo, ?> supplier) {
-    FieldInfo fieldInfo = new FieldInfo(pd.getName(), pd.getPropertyType());
+    FieldInfo fieldInfo = new FieldInfo(pd, pd.getPropertyType());
     Object value;
     try {
       value = supplier.apply(fieldInfo);
