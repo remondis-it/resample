@@ -44,9 +44,9 @@ public class Suppliers {
    * @param dayOfMonth
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
-   *         <li>If the field name contains the word 'from' yesterday is returned
+   *         <li>If the field name contains the word 'from' yesterday relative to the specified date is returned
    *         as {@link ZonedDateTime}.</li>
-   *         <li>If the field name contains the word 'to' tomorrow is returned as
+   *         <li>If the field name contains the word 'to' tomorrow relative to the specified date is returned as
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
@@ -66,12 +66,6 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   *         <ul>
-   *         <li>If the field name contains the word 'from' yesterday is returned
-   *         as {@link Date}.</li>
-   *         <li>If the field name contains the word 'to' tomorrow is returned as
-   *         {@link Date}.</li>
-   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
       int second, int millis) {
@@ -165,9 +159,9 @@ public class Suppliers {
    * @param zone
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
-   *         <li>If the field name contains the word 'from' yesterday is returned
+   *         <li>If the field name contains the word 'from' yesterday relative to the specified date is returned
    *         as {@link ZonedDateTime}.</li>
-   *         <li>If the field name contains the word 'to' tomorrow is returned as
+   *         <li>If the field name contains the word 'to' tomorrow relative to the specified date is returned as
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
