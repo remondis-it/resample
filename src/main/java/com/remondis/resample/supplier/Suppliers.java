@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.remondis.resample.FieldInfo;
+import com.remondis.resample.FunctionSupplier;
+import com.remondis.resample.SampleSupplier;
 
 /**
  * A collection of the most common suppliers.
@@ -39,14 +41,34 @@ public class Suppliers {
   }
 
   /**
-   * @param year
-   * @param month
-   * @param dayOfMonth
+   * @param year The year to supply.
+   * @param month The month to supply.
+   * @param dayOfMonth The day of month to supply.
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
-   *         <li>If the field name contains the word 'from' yesterday relative to the specified date is returned
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
    *         as {@link ZonedDateTime}.</li>
-   *         <li>If the field name contains the word 'to' tomorrow relative to the specified date is returned as
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link ZonedDateTime}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static FunctionSupplier<LocalDate> localDateSampleSupplier(int year, int month, int dayOfMonth) {
+    return new FunctionSupplier<>(LocalDate.class, localDateSupplier(year, month, dayOfMonth));
+  }
+
+  /**
+   * @param year The year to supply.
+   * @param month The month to supply.
+   * @param dayOfMonth The day of month to supply.
+   * @return Returns a period supplier that generates {@link ZonedDateTime}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link ZonedDateTime}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
@@ -66,6 +88,30 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
+      int minute, int second, int millis) {
+    return new FunctionSupplier<>(Date.class, dateSupplier(year, month, dayOfMonth, hourOfDay, minute, second, millis));
+  }
+
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
       int second, int millis) {
@@ -80,6 +126,32 @@ public class Suppliers {
     return _dateSupplier(cal.getTime());
   }
 
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'start' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay) {
+    return new FunctionSupplier<>(Date.class, dateSupplier(year, month, dayOfMonth, hourOfDay));
+  }
+
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay) {
     final Calendar cal = Calendar.getInstance();
     cal.set(Calendar.YEAR, year);
@@ -92,6 +164,33 @@ public class Suppliers {
     return _dateSupplier(cal.getTime());
   }
 
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
+      int minute) {
+    return new FunctionSupplier<>(Date.class, dateSupplier(year, month, dayOfMonth, hourOfDay, minute));
+  }
+
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute) {
     final Calendar cal = Calendar.getInstance();
     cal.set(Calendar.YEAR, year);
@@ -104,6 +203,33 @@ public class Suppliers {
     return _dateSupplier(cal.getTime());
   }
 
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
+      int minute, int second) {
+    return new FunctionSupplier<>(Date.class, dateSupplier(year, month, dayOfMonth, hourOfDay, minute, second));
+  }
+
+  /**
+   * @return Returns a period supplier that generates {@link Date}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
       int second) {
     final Calendar cal = Calendar.getInstance();
@@ -151,17 +277,47 @@ public class Suppliers {
         .contains(pattern.toLowerCase());
   }
 
+  /**
+   * @return Returns a supplier that generates {@link TimeZone}s.
+   */
   public static Function<FieldInfo, TimeZone> timeZoneSupplier(String zoneId) {
     return fi -> TimeZone.getTimeZone(zoneId);
   }
 
   /**
-   * @param zone
+   * @return Returns a supplier that generates {@link TimeZone}s.
+   */
+  public static SampleSupplier<TimeZone> timeZoneSampleSupplier(String zoneId) {
+    return new FunctionSupplier<>(TimeZone.class, timeZoneSupplier(zoneId));
+  }
+
+  /**
+   * @param zone The {@link ZoneId} to use.
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
    *         <ul>
-   *         <li>If the field name contains the word 'from' yesterday relative to the specified date is returned
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
    *         as {@link ZonedDateTime}.</li>
-   *         <li>If the field name contains the word 'to' tomorrow relative to the specified date is returned as
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link ZonedDateTime}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
+   */
+  public static SampleSupplier<ZonedDateTime> zonedDateTimeSampleSupplier(int year, int month, int dayOfMonth, int hour,
+      int minute, int second, int nanoOfSecond, ZoneId zone) {
+    return new FunctionSupplier<>(ZonedDateTime.class,
+        zonedDateTimeSupplier(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone));
+  };
+
+  /**
+   * @param zone The {@link ZoneId} to use.
+   * @return Returns a period supplier that generates {@link ZonedDateTime}s:
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link ZonedDateTime}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
    *         {@link ZonedDateTime}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
@@ -183,10 +339,24 @@ public class Suppliers {
   /**
    * @return Returns a sample supplier returning empty strings.
    */
+  public static SampleSupplier<String> emptyStringSampleSupplier() {
+    return new FunctionSupplier<>(String.class, (fi) -> emptyStringSupplier().get());
+  }
+
+  /**
+   * @return Returns a sample supplier returning empty strings.
+   */
   public static Supplier<String> emptyStringSupplier() {
     return () -> {
       return new String();
     };
+  }
+
+  /**
+   * @return Returns a sample supplier returning empty strings.
+   */
+  public static SampleSupplier<String> fullyQualifiedFieldNameStringSampleSupplier() {
+    return new FunctionSupplier<>(String.class, fullyQualifiedFieldNameStringSupplier());
   }
 
   /**
@@ -204,6 +374,13 @@ public class Suppliers {
   /**
    * @return Returning a sample supplier returning the field name as string with the declaring class' simple name.
    */
+  public static SampleSupplier<String> shortQualifiedFieldNameStringSampleSupplier() {
+    return new FunctionSupplier<>(String.class, shortQualifiedFieldNameStringSupplier());
+  }
+
+  /**
+   * @return Returning a sample supplier returning the field name as string with the declaring class' simple name.
+   */
   public static Function<FieldInfo, String> shortQualifiedFieldNameStringSupplier() {
     return (fi) -> {
       return String.format("%s.%s", fi.getProperty()
@@ -216,74 +393,149 @@ public class Suppliers {
   /**
    * @return Returning a sample supplier returning the field name as string.
    */
+  public static SampleSupplier<String> fieldNameStringSampleSupplier() {
+    return new FunctionSupplier<>(String.class, fieldNameStringSupplier());
+  }
+
+  /**
+   * @return Returning a sample supplier returning the field name as string.
+   */
   public static Function<FieldInfo, String> fieldNameStringSupplier() {
     return (fi) -> {
       return new String(fi.getPropertyName());
     };
   }
 
+  public static SampleSupplier<Long> defaultLongSampleSupplier() {
+    return new FunctionSupplier<>(Long.class, defaultLongSupplier());
+  }
+
   public static Function<FieldInfo, Long> defaultLongSupplier() {
     return (fi) -> 0L;
+  }
+
+  public static SampleSupplier<Boolean> defaultBooleanSampleSupplier() {
+    return new FunctionSupplier<>(Boolean.class, defaultBooleanSupplier());
   }
 
   public static Function<FieldInfo, Boolean> defaultBooleanSupplier() {
     return (fi) -> false;
   }
 
+  public static SampleSupplier<Character> defaultCharacterSampleSupplier() {
+    return new FunctionSupplier<>(Character.class, defaultCharacterSupplier());
+  }
+
   public static Function<FieldInfo, Character> defaultCharacterSupplier() {
     return (fi) -> '\0';
+  }
+
+  public static SampleSupplier<Byte> defaultByteSampleSupplier() {
+    return new FunctionSupplier<>(Byte.class, defaultByteSupplier());
   }
 
   public static Function<FieldInfo, Byte> defaultByteSupplier() {
     return (fi) -> (byte) 0;
   }
 
+  public static SampleSupplier<Short> defaultShortSampleSupplier() {
+    return new FunctionSupplier<>(Short.class, defaultShortSupplier());
+  }
+
   public static Function<FieldInfo, Short> defaultShortSupplier() {
     return (fi) -> (short) 0;
+  }
+
+  public static SampleSupplier<Integer> defaultIntegerSampleSupplier() {
+    return new FunctionSupplier<>(Integer.class, defaultIntegerSupplier());
   }
 
   public static Function<FieldInfo, Integer> defaultIntegerSupplier() {
     return (fi) -> (Integer) 0;
   }
 
+  public static SampleSupplier<Float> defaultFloatSampleSupplier() {
+    return new FunctionSupplier<>(Float.class, defaultFloatSupplier());
+  }
+
   public static Function<FieldInfo, Float> defaultFloatSupplier() {
     return (fi) -> (Float) 0f;
+  }
+
+  public static SampleSupplier<Double> defaultDoubleSampleSupplier() {
+    return new FunctionSupplier<>(Double.class, defaultDoubleSupplier());
   }
 
   public static Function<FieldInfo, Double> defaultDoubleSupplier() {
     return (fi) -> (Double) 0d;
   }
 
+  public static SampleSupplier<Long> oneLongSampleSupplier() {
+    return new FunctionSupplier<>(Long.class, oneLongSupplier());
+  }
+
   public static Function<FieldInfo, Long> oneLongSupplier() {
     return (fi) -> 1L;
+  }
+
+  public static SampleSupplier<Boolean> trueBooleanSampleSupplier() {
+    return new FunctionSupplier<>(Boolean.class, trueBooleanSupplier());
   }
 
   public static Function<FieldInfo, Boolean> trueBooleanSupplier() {
     return (fi) -> true;
   }
 
+  public static SampleSupplier<Byte> oneByteSampleSupplier() {
+    return new FunctionSupplier<>(Byte.class, oneByteSupplier());
+  }
+
   public static Function<FieldInfo, Byte> oneByteSupplier() {
     return (fi) -> (byte) 1;
+  }
+
+  public static SampleSupplier<Short> oneShortSampleSupplier() {
+    return new FunctionSupplier<>(Short.class, oneShortSupplier());
   }
 
   public static Function<FieldInfo, Short> oneShortSupplier() {
     return (fi) -> (short) 1;
   }
 
+  public static SampleSupplier<Integer> oneIntegerSampleSupplier() {
+    return new FunctionSupplier<>(Integer.class, oneIntegerSupplier());
+  }
+
   public static Function<FieldInfo, Integer> oneIntegerSupplier() {
     return (fi) -> (Integer) 1;
+  }
+
+  public static SampleSupplier<Float> oneFloatSampleSupplier() {
+    return new FunctionSupplier<>(Float.class, oneFloatSupplier());
   }
 
   public static Function<FieldInfo, Float> oneFloatSupplier() {
     return (fi) -> (Float) 1f;
   }
 
+  public static SampleSupplier<Double> oneDoubleSampleSupplier() {
+    return new FunctionSupplier<>(Double.class, oneDoubleSupplier());
+  }
+
   public static Function<FieldInfo, Double> oneDoubleSupplier() {
     return (fi) -> (Double) 1d;
   }
 
+  public static SampleSupplier<BigDecimal> defaultBigDecimalSampleSupplier() {
+    return new FunctionSupplier<>(BigDecimal.class, defaultBigDecimalSupplier());
+  }
+
   public static Function<FieldInfo, BigDecimal> defaultBigDecimalSupplier() {
     return (fi) -> BigDecimal.ZERO;
+  }
+
+  public static SampleSupplier<BigDecimal> oneBigDecimalSampleSupplier() {
+    return new FunctionSupplier<>(BigDecimal.class, oneBigDecimalSupplier());
   }
 
   public static Function<FieldInfo, BigDecimal> oneBigDecimalSupplier() {
