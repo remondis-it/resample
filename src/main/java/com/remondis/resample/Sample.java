@@ -166,6 +166,9 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     return type;
   }
 
+  /**
+   * @return Returns a new instance of the specified type.
+   */
   @Override
   public T get() {
     return newInstance();
@@ -337,6 +340,7 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
   private static <T> T createNewInstance(Class<T> type)
       throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
     Constructor<T> constructor = type.getConstructor();
+    constructor.setAccessible(true);
     T newInstance = constructor.newInstance();
     return newInstance;
   }

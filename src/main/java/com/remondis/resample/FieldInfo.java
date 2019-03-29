@@ -11,6 +11,9 @@ public class FieldInfo {
   private PropertyDescriptor property;
   private Class<?> type;
 
+  /**
+   * Creates a new {@link FieldInfo}.
+   */
   public FieldInfo(PropertyDescriptor pd, Class<?> type) {
     super();
     this.property = pd;

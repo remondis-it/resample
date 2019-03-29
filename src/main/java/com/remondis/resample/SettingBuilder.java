@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 /**
  * The {@link SettingBuilder} defines the second stage when defining rules for sample data generation.
- * 
+ *
  * @param <T> The type to create sample instance for.
  * @param <S> The type of field to configure.
  */
@@ -30,6 +30,12 @@ public class SettingBuilder<T, S> {
     this.resample = resample;
   }
 
+  /**
+   * Registers a supplier function to be used for the specified type.
+   *
+   * @param type The type the supplier generates data for.
+   * @return Returns the instance of {@link Sample} for method chaining.
+   */
   public Sample<T> forType(Class<S> type) {
     requireNonNull(type, "Type must not be null.");
     resample.addTypeSetting(supplier, type);
@@ -43,8 +49,8 @@ public class SettingBuilder<T, S> {
   }
 
   /**
-   * Registers the specified supplier function for the field defined by a field selector.
-   * 
+   * Registers a supplier function to be used for the specified field defined by a field selector.
+   *
    * @param fieldSelector The field selector.
    * @return Returns the instance of {@link Sample} for method chaining.
    */
@@ -71,9 +77,9 @@ public class SettingBuilder<T, S> {
   }
 
   /**
-   * Registers the specified supplier function for the field defined by a field selector. This method is for collections
+   * Registers a supplier function to be used for the specified field. This method is for collections
    * and has the same purpose like {@link #forField(TypedSelector)}.
-   * 
+   *
    * @param fieldSelector The field selector.
    * @return Returns the instance of {@link Sample} for method chaining.
    */

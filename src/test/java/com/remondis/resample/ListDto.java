@@ -1,9 +1,9 @@
-package com.remondis.resample.lists;
+package com.remondis.resample;
 
 import java.util.List;
 import java.util.Set;
 
-class ListDto {
+public class ListDto {
 
   private List<Gender> listOfEnumValues;
   private Set<Gender> setOfEnumValues;

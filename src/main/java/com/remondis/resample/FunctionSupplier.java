@@ -14,6 +14,12 @@ public class FunctionSupplier<T> extends AbstractSampleSupplier<T> {
 
   private Function<FieldInfo, T> supplierFunction;
 
+  /**
+   * Creates a new function supplier for the specified type and supplier function.
+   *
+   * @param type The type used by {@link SettingBuilder#forType(Class)}.
+   * @param supplierFunction The supplier function.
+   */
   public FunctionSupplier(Class<T> type, Function<FieldInfo, T> supplierFunction) {
     super(type);
     requireNonNull(supplierFunction, "Supplier function must not be null.");
@@ -23,5 +29,12 @@ public class FunctionSupplier<T> extends AbstractSampleSupplier<T> {
   @Override
   public T newInstance(FieldInfo fieldInfo) {
     return supplierFunction.apply(fieldInfo);
+  }
+
+  /**
+   * @return Returns the supplier function.
+   */
+  public final Function<FieldInfo, T> function() {
+    return supplierFunction;
   }
 }

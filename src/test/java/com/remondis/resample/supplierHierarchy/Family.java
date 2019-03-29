@@ -2,7 +2,7 @@ package com.remondis.resample.supplierHierarchy;
 
 import java.util.List;
 
-public class Family {
+class Family {
 
   private List<Person> persons;
 

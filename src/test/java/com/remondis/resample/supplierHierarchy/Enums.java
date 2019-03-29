@@ -3,7 +3,7 @@ package com.remondis.resample.supplierHierarchy;
 import java.util.List;
 import java.util.Set;
 
-public class Enums {
+class Enums {
 
   private Enumeration enumValue;
   private List<Enumeration> list;

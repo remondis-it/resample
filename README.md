@@ -1,3 +1,9 @@
+[![Maven Central](https://img.shields.io/maven-central/v/com.remondis/resample.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.remondis%22%20AND%20a:%22resample%22)
+
+[ ![Download](https://api.bintray.com/packages/schuettec/maven/com.remondis.resample/images/download.svg) ](https://bintray.com/schuettec/maven/com.remondis.resample/_latestVersion)
+
+[![Build Status](https://travis-ci.org/remondis-it/resample.svg?branch=master)](https://travis-ci.org/remondis-it/resample)
+
 # ReSample - A Test Fixture Generator
 
 # Table of Contents
@@ -13,6 +19,8 @@ ReSample is a small library that creates sample instances of Java Beans by filli
 
 This library reduces the overhead of creating fixtures by initializing the complete object with valid (non-null) values. This way you can focus on the data needed for the test case rather than setting all required values by hand to not break not-null constraints for example.
 
+ReSample is intended to always return static test data values. It is not the purpose of ReSample to generate random test data.
+
 ### Example
 
 The following example demonstrates how to generate a sample instance of `Person`.
@@ -23,27 +31,36 @@ The following example demonstrates how to generate a sample instance of `Person`
 		private String forname;
 		private int age;
 		private LocalDate brithday;
+		private Gender gender;
 
 		// Default Constructor
 		// Getter / Setter...
 	}
 
+	enum Gender {
+		MALE,
+		FEMALE,
+		UNKOWN;
+	}
+
+
 	@Test
 	public void shouldGenerateSampleData() {
-		Person person = Sample.of(Person.class)
-		    .checkForNullFields()
-		    .use(fieldNameStringSupplier())
-		    .forType(String.class)
-		    .use(localDateSupplier())
-		    .forField(Person::getBrithday)
-		    .newInstance();
-		System.out.println(person);
+	  Person person = Samples.of(Person.class)
+	      .checkForNullFields()
+	      .useForEnum(enumValueSupplier())
+	      .use(fieldNameStringSupplier())
+	      .forType(String.class)
+	      .use(localDateSupplier(2018, 8, 30))
+	      .forField(Person::getBrithday)
+	      .newInstance();
+	  System.out.println(person);
 	}
 ```
 
 The above example will generate a `Person` instance with the follwing values:
 ```
-Person [name=name, forname=forname, age=0, brithday=2018-08-30]
+Person [name=name, forname=forname, age=0, brithday=2018-08-30, gender=MALE]
 ```
 
 ## Features
@@ -76,14 +93,15 @@ ReSample provides the following features to create test data fixtures:
 ```
 	@Test
 	public void shouldGenerateSampleData() {
-		Person person = Sample.of(Person.class)
+		Person person = Samples.of(Person.class)
 		    .checkForNullFields()
+		    .useForEnum(enumValueSupplier())
 		    .use(fieldNameStringSupplier())
 		    .forType(String.class)
-		    .use(localDateSupplier())
+		    .use(localDateSupplier(2018, 8, 30))
 		    .forField(Person::getBrithday)
 		    .newInstance();
-		System.out.println(person);
+			System.out.println(person);
 	}
 ```
 
@@ -105,4 +123,11 @@ ReSample defines a scope hierarchy that is used when applying value factories:
 ### Auto-sampling
 
 ReSample supports auto-sampling which tries to reduce the configuration overhead for large object graphs. When auto-sampling is active the configuration is applied to all transitive references of the object graph. This way all Java Beans can be generated using one configuration.
+
+
+
+# How to contribute
+Please refer to the project's [contribution guide](CONTRIBUTE.md)
+
+
 

@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FieldInfoImpl;
-import com.remondis.resample.supplierHierarchy.Enumeration;
 
 public class SuppliersTest {
 
@@ -39,8 +38,8 @@ public class SuppliersTest {
   @Test
   public void shouldReturnEnumValue() {
     Function<FieldInfo, Object> f = enumValueSupplier();
-    Object retVal = f.apply(new FieldInfoImpl("propertyName", Enumeration.class));
-    assertEquals(Enumeration.ENUM_1, retVal);
+    Object retVal = f.apply(new FieldInfoImpl("propertyName", DummyEnum.class));
+    assertEquals(DummyEnum.ENUM_1, retVal);
   }
 
   @Test

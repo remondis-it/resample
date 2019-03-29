@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.remondis.resample.lists.Gender;
-import com.remondis.resample.lists.ListDto;
-
 public class ReflectionUtilTest {
 
   @Test

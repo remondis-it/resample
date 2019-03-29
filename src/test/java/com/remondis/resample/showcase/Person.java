@@ -1,4 +1,4 @@
-package com.remondis.resample.supplierHierarchy;
+package com.remondis.resample.showcase;
 
 import java.time.LocalDate;
 
@@ -65,6 +65,8 @@ class Person {
 
   @Override
   public String toString() {
-    return "Person [name=" + name + ", forname=" + forname + ", age=" + age + ", brithday=" + brithday + "]";
+    return "Person [name=" + name + ", forname=" + forname + ", age=" + age + ", brithday=" + brithday + ", gender="
+        + gender + "]";
   }
+
 }
