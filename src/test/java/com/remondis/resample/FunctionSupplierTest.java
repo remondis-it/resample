@@ -1,5 +1,6 @@
 package com.remondis.resample;
 
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -21,6 +22,12 @@ public class FunctionSupplierTest {
     FunctionSupplier<String> function = new FunctionSupplier<String>(String.class, mock);
     function.newInstance(null);
     verify(mock, times(1)).apply(null);
+  }
+
+  @Test
+  public void shouldReturnFunction() {
+    FunctionSupplier<String> function = new FunctionSupplier<String>(String.class, mock);
+    assertSame(mock, function.function());
   }
 
 }
