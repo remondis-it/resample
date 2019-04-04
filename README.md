@@ -111,7 +111,7 @@ ReSample can ensure that every property of the Java Bean was hit by a configurat
 
 ## Suppliers
 
-ReSample provides a set of ready-to-use suppliers. The following list may not be complete. For a full documentation of provided suppliers please have a look at the JavaDoc of `com.remondis.resample.supplier.Suppliers` or click [here](src/main/java/com/remondis/resample/supplier).
+ReSample provides a set of ready-to-use suppliers. The following list may not be complete. For a full documentation of provided suppliers please have a look at the JavaDoc of `com.remondis.resample.supplier.Suppliers` or click [here](src/main/java/com/remondis/resample/supplier/Suppliers.java).
 There are suppliers for:
 
 - long, int, short, byte, float, double, boolean for different default values
