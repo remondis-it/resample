@@ -44,14 +44,14 @@ public class Suppliers {
    * @param year The year to supply.
    * @param month The month to supply.
    * @param dayOfMonth The day of month to supply.
-   * @return Returns a period supplier that generates {@link ZonedDateTime}s:
+   * @return Returns a period supplier that generates {@link LocalDate}s:
    *         <ul>
    *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
    *         returned
-   *         as {@link ZonedDateTime}.</li>
+   *         as {@link LocalDate}.</li>
    *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
    *         as
-   *         {@link ZonedDateTime}.</li>
+   *         {@link LocalDate}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<LocalDate> localDateSampleSupplier(int year, int month, int dayOfMonth) {
@@ -62,14 +62,14 @@ public class Suppliers {
    * @param year The year to supply.
    * @param month The month to supply.
    * @param dayOfMonth The day of month to supply.
-   * @return Returns a period supplier that generates {@link ZonedDateTime}s:
+   * @return Returns a period supplier that generates {@link LocalDate}s:
    *         <ul>
    *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
    *         returned
-   *         as {@link ZonedDateTime}.</li>
+   *         as {@link LocalDate}.</li>
    *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
    *         as
-   *         {@link ZonedDateTime}.</li>
+   *         {@link LocalDate}.</li>
    *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, LocalDate> localDateSupplier(int year, int month, int dayOfMonth) {

@@ -8,8 +8,10 @@
 1. [Overview](#overview)
 2. [Features](#features)
 3. [How to use](#how-to-use)
-4. [Scope hierarchy](#scope-hierarchy)
-5. [Auto-sampling](#auto-sampling)
+4. [Suppliers](#suppliers)
+5. [Scope hierarchy](#scope-hierarchy)
+6. [Auto-sampling](#auto-sampling)
+7. [How to contribute](#how-to-contribute)
 
 ## Overview
 
@@ -106,6 +108,20 @@ ReSample provides the following features to create test data fixtures:
 The example above shows how to use the core functions of ReSample. Basically you can register supplier lambdas on a per type or per field basis. The fixture generator then creates a new instance of the specified type reflectively and applies all supplier lambdas. The suppliers are expected to create new values each time they are called. All field hit by the configuration will be access through setter methods to set the generated values.
 
 ReSample can ensure that every property of the Java Bean was hit by a configuration. This way the generation aborts with an exception if the object is not completely initialized after data generation. This way it is easy to get notified if a field was added to the Java Bean but no sample value would be generated.
+
+## Suppliers
+
+ReSample provides a set of ready-to-use suppliers. The following list may not be complete. For a full documentation of provided suppliers please have a look at the JavaDoc of `com.remondis.resample.supplier.Suppliers` or click [here](src/main/java/com/remondis/resample/supplier).
+There are suppliers for:
+
+- long, int, short, byte, float, double, boolean for different default values
+- enum values
+- Date, LocalDate, ZonedDateTime
+- BigDecimal
+
+Suppliers can be extended by the user to implement special requirements.
+
+If you miss a supplier implementation your PR ist very welcome! See [How to contribute](#how-to-contribute)!
 
 ### Scope hierarchy
 
