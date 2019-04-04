@@ -328,7 +328,7 @@ public class Suppliers {
         return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
             .minus(1, ChronoUnit.DAYS);
       } else if (isPeriodEndField(info)) {
-        return ZonedDateTime.now()
+        return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
             .plus(1, ChronoUnit.DAYS);
       } else {
         return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone);
