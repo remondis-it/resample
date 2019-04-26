@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  *
  * @param <T>
  */
-public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
+public final class Sample<T> implements Supplier<T> {
   private Class<T> type;
 
   private Map<Class<?>, Function<FieldInfo, ?>> typeSettings = new Hashtable<>();
@@ -161,22 +161,8 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
     fieldSettings.put(propertyDescriptor, supplier);
   }
 
-  @Override
   public Class<T> getType() {
     return type;
-  }
-
-  /**
-   * @return Returns a new instance of the specified type.
-   */
-  @Override
-  public T get() {
-    return newInstance();
-  }
-
-  @Override
-  public T newInstance(FieldInfo fieldInfo) {
-    return get();
   }
 
   /**
@@ -298,9 +284,9 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
     Function<FieldInfo, ?> supplier = null;
     if (isCollection(pd)) {
-      supplier = wrapInList(pd, autoSample::newInstance);
+      supplier = wrapInList(pd, fi -> autoSample.newInstance());
     } else {
-      supplier = autoSample::newInstance;
+      supplier = fi -> autoSample.newInstance();
     }
 
     try {
@@ -540,6 +526,11 @@ public final class Sample<T> implements SampleSupplier<T>, Supplier<T> {
 
   boolean hasTypeSetting(Class<?> type) {
     return typeSettings.containsKey(type);
+  }
+
+  @Override
+  public T get() {
+    return newInstance();
   }
 
 }
