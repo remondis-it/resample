@@ -3,6 +3,10 @@ package com.remondis.resample.showcase;
 import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.time.LocalDate;
 
 import org.junit.Test;
 
@@ -20,7 +24,12 @@ public class Showcase {
         .use(localDateSupplier(2018, 8, 30))
         .forField(Person::getBrithday)
         .newInstance();
-    System.out.println(person);
+    assertNotNull(person);
+    assertEquals("name", person.getName());
+    assertEquals("forname", person.getForname());
+    assertEquals(0, person.getAge());
+    assertEquals(LocalDate.of(2018, 8, 30), person.getBrithday());
+    assertEquals(Gender.MALE, person.getGender());
   }
 
 }

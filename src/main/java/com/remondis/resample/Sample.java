@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 /**
  * The {@link Sample} class can generate instances of beans containing sample
- * data. You can configure data factories per type or per field. Note that the type to
- * generate sample instances for must be a Java Bean:
+ * data. You can configure data factories per type or per field. Note that the
+ * type to generate sample instances for must be a Java Bean:
  *
  * <ul>
  * <li>A property is a field with any visibility</li>
@@ -59,8 +59,9 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Configures the {@link Sample} instance to use auto-sampling. The generator will then try to generate all transitive
-   * object references by using the same instance of {@link Sample}.
+   * Configures the {@link Sample} instance to use auto-sampling. The
+   * generator will then try to generate all transitive object references by
+   * using the same instance of {@link Sample}.
    *
    * @return Returns this object for method chaining.
    */
@@ -70,10 +71,22 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Configures the specified {@link Sample} instance to be used by this {@link Sample}. The specified sampler will be
-   * used by type.
+   * Configures the {@link Sample} instance to <b>deactivate</b>
+   * auto-sampling.
    *
-   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   * @return Returns this object for method chaining.
+   */
+  public Sample<T> deactivateAutoSampling() {
+    this.useAutoSampling = false;
+    return this;
+  }
+
+  /**
+   * Configures the specified {@link Sample} instance to be used by this
+   * {@link Sample}. The specified sampler will be used by type.
+   *
+   * @return Returns {@link SettingBuilder} to specify the scope of this
+   *         supplier.
    */
   public <S> Sample<T> useSample(Sample<S> sample) {
     use((Supplier<S>) sample).forType(sample.getType());
@@ -81,10 +94,12 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Configures the {@link Supplier} to be used by this {@link Sample} instance. The scope in which this supplier is
-   * used is defined on the object that is returned by this method.
+   * Configures the {@link Supplier} to be used by this {@link Sample}
+   * instance. The scope in which this supplier is used is defined on the
+   * object that is returned by this method.
    *
-   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   * @return Returns {@link SettingBuilder} to specify the scope of this
+   *         supplier.
    */
   public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
     return use(fieldInfo -> {
@@ -93,13 +108,15 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Configures the {@link SampleSupplier} to be used by this {@link Sample} instance.
+   * Configures the {@link SampleSupplier} to be used by this {@link Sample}
+   * instance.
    * <p>
    * This method does the same as: <br/>
    * <code>this.use(sampleSupplier::newInstance).forType(sampleSupplier.getType());</code>
    * </p>
    *
-   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   * @return Returns {@link SettingBuilder} to specify the scope of this
+   *         supplier.
    */
   public <S> Sample<T> use(SampleSupplier<S> sampleSupplier) {
     this.use(sampleSupplier::newInstance)
@@ -108,14 +125,17 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Configures the {@link Function} to be used by this {@link Sample} instance. The scope in which this function is
-   * used is defined on the object that is returned by this method.
+   * Configures the {@link Function} to be used by this {@link Sample}
+   * instance. The scope in which this function is used is defined on the
+   * object that is returned by this method.
    *
    * <p>
-   * This method enables supplier implementations to get more information of the target field.
+   * This method enables supplier implementations to get more information of
+   * the target field.
    * </p>
    *
-   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   * @return Returns {@link SettingBuilder} to specify the scope of this
+   *         supplier.
    */
   public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
     requireNonNull(function, "Function must not be null.");
@@ -125,7 +145,8 @@ public final class Sample<T> implements Supplier<T> {
   /**
    * Configures a {@link Function} to be used as enum value supplier function.
    *
-   * @return Returns {@link SettingBuilder} to specify the scope of this supplier.
+   * @return Returns {@link SettingBuilder} to specify the scope of this
+   *         supplier.
    */
   public Sample<T> useForEnum(Function<FieldInfo, Enum<?>> function) {
     this.enumValueSupplier = function;
@@ -133,7 +154,8 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Activates a check to ensure that all Bean properties got a sample instance value after generation.
+   * Activates a check to ensure that all Bean properties got a sample
+   * instance value after generation.
    *
    * @return Returns this object for method chaining.
    */
@@ -143,8 +165,8 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
-   * Deactivates the instance check: It is possible to skip fields in the sample configuration so no values will be
-   * generated for them.
+   * Deactivates the instance check: It is possible to skip fields in the
+   * sample configuration so no values will be generated for them.
    *
    * @return Returns this object for method chaining.
    */
@@ -175,7 +197,8 @@ public final class Sample<T> implements Supplier<T> {
       Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
       // Set all enum values
       Set<PropertyDescriptor> hitEnums = setAllEnumValues(newInstance);
-      // Execute all type registered factories but skip the properties in the set of
+      // Execute all type registered factories but skip the properties in
+      // the set of
       // field configurations.
       Set<PropertyDescriptor> hitByType = setAllValuesByTypeSettingsExcludingFieldSettings(newInstance);
       // Execute all the fieldConfigurations
