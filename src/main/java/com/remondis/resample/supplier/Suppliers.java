@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,6 +23,20 @@ import com.remondis.resample.SampleSupplier;
  * A collection of the most common suppliers.
  */
 public class Suppliers {
+
+  /**
+   * @return Returns a null supplier for the given <b>type</b>.
+   */
+  public static <T> FunctionSupplier<T> nullValueSampleSupplier(Class<T> type) {
+    return new FunctionSupplier<>(type, nullValueSupplier(type));
+  }
+
+  /**
+   * @return Returns a null supplier for the given <b>type</b>.
+   */
+  public static <T> Function<FieldInfo, T> nullValueSupplier(Class<T> type) {
+    return (fi) -> (T) null;
+  }
 
   /**
    * @return Returns a supplier of a sample enum value.
@@ -307,7 +322,9 @@ public class Suppliers {
       int minute, int second, int nanoOfSecond, ZoneId zone) {
     return new FunctionSupplier<>(ZonedDateTime.class,
         zonedDateTimeSupplier(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone));
-  };
+  }
+
+  ;
 
   /**
    * @param zone The {@link ZoneId} to use.
@@ -542,4 +559,43 @@ public class Suppliers {
     return (fi) -> BigDecimal.ONE;
   }
 
+  public static SampleSupplier<BigDecimal> bigDecimalSampleSupplier(Integer integer) {
+    return new FunctionSupplier<>(BigDecimal.class, bigDecimalSupplier(integer));
+  }
+
+  public static Function<FieldInfo, BigDecimal> bigDecimalSupplier(Integer integer) {
+    return (fi) -> integer == null ? null : BigDecimal.valueOf(integer);
+  }
+
+  public static SampleSupplier<BigDecimal> bigDecimalSampleSupplier(Double aDouble) {
+    return new FunctionSupplier<>(BigDecimal.class, bigDecimalSupplier(aDouble));
+  }
+
+  public static Function<FieldInfo, BigDecimal> bigDecimalSupplier(Double aDouble) {
+    return (fi) -> aDouble == null ? null : BigDecimal.valueOf(aDouble);
+  }
+
+  public static SampleSupplier<BigInteger> defaultBigIntegerSampleSupplier() {
+    return new FunctionSupplier<>(BigInteger.class, defaultBigIntegerSupplier());
+  }
+
+  public static Function<FieldInfo, BigInteger> defaultBigIntegerSupplier() {
+    return (fi) -> BigInteger.ZERO;
+  }
+
+  public static SampleSupplier<BigInteger> oneBigIntegerSampleSupplier() {
+    return new FunctionSupplier<>(BigInteger.class, oneBigIntegerSupplier());
+  }
+
+  public static Function<FieldInfo, BigInteger> oneBigIntegerSupplier() {
+    return (fi) -> BigInteger.ONE;
+  }
+
+  public static SampleSupplier<BigInteger> bigIntegerSampleSupplier(Integer integer) {
+    return new FunctionSupplier<>(BigInteger.class, bigIntegerSupplier(integer));
+  }
+
+  public static Function<FieldInfo, BigInteger> bigIntegerSupplier(Integer integer) {
+    return (fi) -> integer == null ? null : BigInteger.valueOf(integer);
+  }
 }

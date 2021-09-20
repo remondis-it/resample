@@ -126,8 +126,7 @@ class ReflectionUtil {
   /**
    * Checks if the specified type is a Java primitive type.
    *
-   * @param type
-   *        The type to check
+   * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java primitive
    *         type, otherwise <code>false</code> is returned.
    */
@@ -138,8 +137,7 @@ class ReflectionUtil {
   /**
    * Checks if the specified type is a Java primitive or a wrapper type.
    *
-   * @param type
-   *        The type to check
+   * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java primitive or a wrapper
    *         type, otherwise <code>false</code> is returned.
    */
@@ -150,8 +148,7 @@ class ReflectionUtil {
   /**
    * Checks if the specified type is a Java wrapper type.
    *
-   * @param type
-   *        The type to check
+   * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java wrapper
    *         type, otherwise <code>false</code> is returned.
    */
@@ -202,7 +199,7 @@ class ReflectionUtil {
 
   /**
    * Performs a field identification on the specified type using the specified {@link TypedSelector}.
-   * 
+   *
    * <p>
    * When building libraries that work on a field basis, it can be useful to provide an API that lets the client select
    * a field on a class since fields cannot be represented as literals. To do this an mock-instance of the target type
@@ -210,13 +207,18 @@ class ReflectionUtil {
    * get-method for the property/field to select. This call identifies a field in the specified class that can then be
    * used by the library for any reflective purpose.
    * </p>
-   * 
+   *
    * @param type The type of Java Bean.
    * @param fieldSelector The field selector lambda performing a single get-method call to select a property.
    * @return Returns the {@link PropertyDescriptor} that was selected by the {@link TypedSelector}.
    */
   public static <S, T> PropertyDescriptor getPropertyDescriptorBySensorCall(Class<T> type,
       TypedSelector<S, T> fieldSelector) {
+    return getPropertyDescriptorBySensorCall(type, fieldSelector, CollectionSamplingMode.USE_SETTER_METHODE);
+  }
+
+  public static <S, T> PropertyDescriptor getPropertyDescriptorBySensorCall(Class<T> type,
+      TypedSelector<S, T> fieldSelector, CollectionSamplingMode collectionSamplingMode) {
     requireNonNull(fieldSelector, "Type must not be null.");
     InvocationSensor<T> invocationSensor = new InvocationSensor<T>(type);
     T sensor = invocationSensor.getSensor();
@@ -229,7 +231,7 @@ class ReflectionUtil {
       // get the property name
       String propertyName = trackedPropertyNames.get(0);
       // find the property descriptor or fail with an exception
-      return getPropertyDescriptorOrFail(type, propertyName);
+      return getPropertyDescriptorOrFail(type, propertyName, collectionSamplingMode);
     } else {
       throw zeroInteractions();
     }
@@ -245,17 +247,14 @@ class ReflectionUtil {
    * Ensures that the specified property name is a property in the specified
    * {@link Set} of {@link PropertyDescriptor}s.
    *
-   * @param target
-   *        Defines if the properties are validated against source or target
-   *        rules.
-   * @param type
-   *        The inspected type.
-   * @param propertyName
-   *        The property name
+   * @param type The inspected type.
+   * @param propertyName The property name.
+   * @param collectionSamplingMode {@link CollectionSamplingMode} defines how collection fields are sampled.
    */
-  static PropertyDescriptor getPropertyDescriptorOrFail(Class<?> type, String propertyName) {
+  static PropertyDescriptor getPropertyDescriptorOrFail(Class<?> type, String propertyName,
+      CollectionSamplingMode collectionSamplingMode) {
     Optional<PropertyDescriptor> property;
-    property = Properties.getProperties(type)
+    property = Properties.getProperties(type, collectionSamplingMode)
         .stream()
         .filter(pd -> pd.getName()
             .equals(propertyName))
@@ -274,8 +273,7 @@ class ReflectionUtil {
    * https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html for
    * more information.
    *
-   * @param type
-   *        The type of the primitive.
+   * @param type The type of the primitive.
    * @return Returns the default value of the specified primitive type.
    */
   @SuppressWarnings("unchecked")
@@ -293,8 +291,7 @@ class ReflectionUtil {
    * {@link Collection} instance. This method currently supports {@link Set} and
    * {@link List}.
    *
-   * @param collection
-   *        The actual collection instance.
+   * @param collectionType The actual collection instance.
    * @return Returns the {@link Collector} that creates a new {@link Collection}
    *         of the same type.
    */
@@ -312,8 +309,7 @@ class ReflectionUtil {
   /**
    * Checks if the method has a return type.
    *
-   * @param method
-   *        the method
+   * @param method the method
    * @return <code>true</code>, if return type is not {@link Void} or
    *         <code>false</code> otherwise.
    */
@@ -367,8 +363,7 @@ class ReflectionUtil {
    * Returns the name of a property represented with either a getter or setter
    * method.
    *
-   * @param method
-   *        The getter or setter method.
+   * @param method The getter or setter method.
    * @return Returns the name of the property.
    */
   static String toPropertyName(Method method) {
@@ -397,22 +392,15 @@ class ReflectionUtil {
    * proxy. (Proxy instances are not classes of the type the method was declared
    * in.)
    *
-   * @param method
-   *        The method to be invoked
-   * @param targetObject
-   *        The target object or proxy instance.
-   * @param args
-   *        (Optional) Arguments to pass to the invoked method or
+   * @param method The method to be invoked
+   * @param targetObject The target object or proxy instance.
+   * @param args (Optional) Arguments to pass to the invoked method or
    *        <code>null</code> indicating no parameters.
    * @return Returns the return value of the method on demand.
-   * @throws IllegalAccessException
-   *         Thrown on any access error.
-   * @throws InvocationTargetException
-   *         Thrown on any invocation error.
-   * @throws SecurityException
-   *         Thrown if the reflective operation is not allowed
-   * @throws NoSuchMethodException
-   *         Thrown if the proxy instance does not provide the desired method.
+   * @throws IllegalAccessException Thrown on any access error.
+   * @throws InvocationTargetException Thrown on any invocation error.
+   * @throws SecurityException Thrown if the reflective operation is not allowed
+   * @throws NoSuchMethodException Thrown if the proxy instance does not provide the desired method.
    */
   static Object invokeMethodProxySafe(Method method, Object targetObject, Object... args)
       throws IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
@@ -433,8 +421,7 @@ class ReflectionUtil {
   /**
    * Creates a new instance of the specified type.
    *
-   * @param type
-   *        The type to instantiate
+   * @param type The type to instantiate
    * @return Returns a new instance.
    */
   static <D> D newInstance(Class<D> type) {

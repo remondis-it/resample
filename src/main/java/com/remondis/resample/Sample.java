@@ -17,9 +17,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,6 +55,8 @@ public final class Sample<T> implements Supplier<T> {
 
   private boolean useAutoSampling;
 
+  private CollectionSamplingMode collectionSamplingMode = CollectionSamplingMode.USE_SETTER_METHODE;
+
   Sample(Class<T> type) {
     super();
     this.type = type;
@@ -78,6 +82,18 @@ public final class Sample<T> implements Supplier<T> {
    */
   public Sample<T> deactivateAutoSampling() {
     this.useAutoSampling = false;
+    return this;
+  }
+
+  /**
+   * Configures the {@link Sample} instance to use the given <b>collectionSamplingMode</b>.
+   * Default is {@link CollectionSamplingMode#USE_SETTER_METHODE}
+   *
+   * @return Returns this object for method chaining.
+   */
+  public Sample<T> collectionSamplingMode(CollectionSamplingMode collectionSamplingMode) {
+    Objects.requireNonNull(collectionSamplingMode, "CollectionSamplingMode must not be null.");
+    this.collectionSamplingMode = collectionSamplingMode;
     return this;
   }
 
@@ -184,7 +200,11 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   public Class<T> getType() {
-    return type;
+    return this.type;
+  }
+
+  public CollectionSamplingMode getCollectionSamplingMode() {
+    return this.collectionSamplingMode;
   }
 
   /**
@@ -356,7 +376,7 @@ public final class Sample<T> implements Supplier<T> {
 
   private Set<PropertyDescriptor> setAllEnumValues(T newInstance) {
     if (nonNull(enumValueSupplier)) {
-      return Properties.getProperties(type)
+      return Properties.getProperties(type, collectionSamplingMode)
           .stream()
           .filter(pd -> {
             Class<?> propertyType = pd.getPropertyType();
@@ -421,13 +441,13 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   private Set<PropertyDescriptor> getNotHitFields(Set<PropertyDescriptor> hitProperties) {
-    Set<PropertyDescriptor> properties = Properties.getProperties(type);
+    Set<PropertyDescriptor> properties = Properties.getProperties(type, collectionSamplingMode);
     properties.removeAll(hitProperties);
     return properties;
   }
 
   private Set<PropertyDescriptor> setAllValuesForPrimitiveFields(T newInstance) {
-    return Properties.getProperties(type)
+    return Properties.getProperties(type, collectionSamplingMode)
         .stream()
         .filter(pd -> {
           return isPrimitiveCompatible(pd.getPropertyType()) || isPrimitiveCollection(pd);
@@ -460,7 +480,7 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   private Set<PropertyDescriptor> setAllValuesByTypeSettingsExcludingFieldSettings(T newInstance) {
-    return Properties.getProperties(type)
+    return Properties.getProperties(type, collectionSamplingMode)
         .stream()
         .filter(pd -> {
           return !fieldSettings.containsKey(pd);
@@ -513,9 +533,20 @@ public final class Sample<T> implements Supplier<T> {
 
   void writeOrFail(PropertyDescriptor property, Object targetInstance, Object value) {
     try {
-      Method writeMethod = property.getWriteMethod();
-      writeMethod.setAccessible(true);
-      writeMethod.invoke(targetInstance, value);
+      if (isCollection(property) && CollectionSamplingMode.USE_GETTER_AND_ADD.equals(collectionSamplingMode)) {
+        Method readMethod = property.getReadMethod();
+        readMethod.setAccessible(true);
+        Collection<Object> invoke = (Collection<Object>) readMethod.invoke(targetInstance);
+        if (value instanceof Collection) {
+          invoke.addAll((Collection) value);
+        } else {
+          invoke.add(value);
+        }
+      } else {
+        Method writeMethod = property.getWriteMethod();
+        writeMethod.setAccessible(true);
+        writeMethod.invoke(targetInstance, value);
+      }
     } catch (InvocationTargetException e) {
       throw ReflectionException.invocationTarget(property, e);
     } catch (Exception e) {

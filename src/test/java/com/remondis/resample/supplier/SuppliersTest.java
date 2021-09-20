@@ -5,10 +5,12 @@ import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -17,12 +19,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Function;
-import java.util.function.Supplier;
-
-import org.junit.Test;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FieldInfoImpl;
+import org.junit.Test;
 
 public class SuppliersTest {
 
@@ -142,33 +142,56 @@ public class SuppliersTest {
   }
 
   @Test
-  public void shouldReturnEmptyString() {
-    Supplier<String> s = Suppliers.emptyStringSupplier();
-    assertEquals("", s.get());
+  public void stringSupplier_shouldReturnString() throws IntrospectionException {
+    FieldInfo field = new FieldInfo(new PropertyDescriptor("number", Dummy.class), String.class);
+
+    assertEquals("", Suppliers.emptyStringSampleSupplier()
+        .newInstance(field));
+    assertEquals("number", Suppliers.fieldNameStringSampleSupplier()
+        .newInstance(field));
+    assertEquals("com.remondis.resample.supplier.Dummy.number", Suppliers.fullyQualifiedFieldNameStringSampleSupplier()
+        .newInstance(field));
+    assertEquals("Dummy.number", Suppliers.shortQualifiedFieldNameStringSampleSupplier()
+        .newInstance(field));
   }
 
   @Test
-  public void shouldReturnFieldName() {
-    Function<FieldInfo, String> f = Suppliers.fieldNameStringSupplier();
-    String expected = "propertyName";
-    String actual = f.apply(new FieldInfoImpl(expected, String.class));
-    assertEquals(expected, actual);
+  public void bigDecimalSupplier_shouldProvideBigDecimal() throws IntrospectionException {
+    FieldInfo field = new FieldInfo(new PropertyDescriptor("number", Dummy.class), BigDecimal.class);
+
+    assertEquals(BigDecimal.valueOf(42), Suppliers.bigDecimalSampleSupplier(42)
+        .newInstance(field));
+    assertEquals(BigDecimal.valueOf(42.11), Suppliers.bigDecimalSampleSupplier(42.11)
+        .newInstance(field));
+    assertEquals(BigDecimal.ONE, Suppliers.oneBigDecimalSampleSupplier()
+        .newInstance(field));
+    assertEquals(BigDecimal.ZERO, Suppliers.defaultBigDecimalSampleSupplier()
+        .newInstance(field));
   }
 
   @Test
-  public void shouldReturnFullyQualifiedFieldName() throws IntrospectionException {
-    Function<FieldInfo, String> f = Suppliers.fullyQualifiedFieldNameStringSupplier();
-    PropertyDescriptor pd = new PropertyDescriptor("number", Dummy.class);
-    String string = f.apply(new FieldInfo(pd, BigDecimal.class));
-    assertEquals("com.remondis.resample.supplier.Dummy.number", string);
+  public void bigIntegerSupplier_shouldProvideBigInteger() throws IntrospectionException {
+    FieldInfo field = new FieldInfo(new PropertyDescriptor("number", Dummy.class), BigInteger.class);
+
+    assertEquals(BigInteger.valueOf(42), Suppliers.bigIntegerSampleSupplier(42)
+        .newInstance(field));
+    assertEquals(BigInteger.ONE, Suppliers.oneBigIntegerSampleSupplier()
+        .newInstance(field));
+    assertEquals(BigInteger.ZERO, Suppliers.defaultBigIntegerSampleSupplier()
+        .newInstance(field));
   }
 
   @Test
-  public void shouldReturnShortQualifiedFieldName() throws IntrospectionException {
-    Function<FieldInfo, String> f = Suppliers.shortQualifiedFieldNameStringSupplier();
-    PropertyDescriptor pd = new PropertyDescriptor("number", Dummy.class);
-    String string = f.apply(new FieldInfo(pd, BigDecimal.class));
-    assertEquals("Dummy.number", string);
-  }
+  public void nullSupplier_shouldProvideTypedNull() throws IntrospectionException {
+    FieldInfo numberField = new FieldInfo(new PropertyDescriptor("number", Dummy.class), BigDecimal.class);
+    FieldInfo stringField = new FieldInfo(new PropertyDescriptor("number", Dummy.class), String.class);
+    FieldInfo dummyField = new FieldInfo(new PropertyDescriptor("number", Dummy.class), Dummy.class);
 
+    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+        .newInstance(numberField));
+    assertNull(Suppliers.nullValueSampleSupplier(String.class)
+        .newInstance(stringField));
+    assertNull(Suppliers.nullValueSampleSupplier(Dummy.class)
+        .newInstance(dummyField));
+  }
 }
