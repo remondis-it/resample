@@ -7,7 +7,7 @@ public enum CollectionSamplingMode {
    */
   USE_SETTER_METHODE,
   /**
-   * Use getter for a collection field and add a new Instance to it. (For JAXB generated objects)
+   * Use getter for a collection field and add a new Instance to it. (For JAXB generated objects).
    */
   USE_GETTER_AND_ADD
 

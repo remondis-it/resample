@@ -17,8 +17,7 @@ public class JaxBListTest {
 
   @Test
   public void shouldGenerateList() {
-    JaxBListDto instance = Samples
-        .of(JaxBListDto.class)
+    JaxBListDto instance = Samples.of(JaxBListDto.class)
         .collectionSamplingMode(USE_GETTER_AND_ADD)
         .useForEnum(enumValueSupplier())
         .use(fieldNameStringSupplier())

@@ -128,7 +128,7 @@ class ReflectionUtil {
    *
    * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java primitive
-   * type, otherwise <code>false</code> is returned.
+   *         type, otherwise <code>false</code> is returned.
    */
   public static boolean isPrimitive(Class<?> type) {
     return PRIMITIVE_TYPES.contains(type);
@@ -139,7 +139,7 @@ class ReflectionUtil {
    *
    * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java primitive or a wrapper
-   * type, otherwise <code>false</code> is returned.
+   *         type, otherwise <code>false</code> is returned.
    */
   public static boolean isPrimitiveCompatible(Class<?> type) {
     return isPrimitive(type) || isWrapperType(type);
@@ -150,7 +150,7 @@ class ReflectionUtil {
    *
    * @param type The type to check
    * @return Returns <code>true</code> if the specified type is a Java wrapper
-   * type, otherwise <code>false</code> is returned.
+   *         type, otherwise <code>false</code> is returned.
    */
   public static boolean isWrapperType(Class<?> type) {
     return WRAPPERS_TO_PRIMITIVES.containsKey(type);
@@ -161,7 +161,7 @@ class ReflectionUtil {
    *
    * @param pd {@link PropertyDescriptor}
    * @return Returns <code>true</code> if the specified {@link PropertyDescriptor} references a property that accesses
-   * {@link Collections} of primitive type wrappers, otherwise <code>false</code> is returned.
+   *         {@link Collections} of primitive type wrappers, otherwise <code>false</code> is returned.
    */
   public static boolean isPrimitiveCollection(PropertyDescriptor pd) {
     return ReflectionUtil.isCollection(pd.getPropertyType()) && isWrapperType(getCollectionType(pd));
@@ -173,7 +173,8 @@ class ReflectionUtil {
   public static Class<?> getCollectionType(PropertyDescriptor pd) {
     boolean isCollection = isCollection(pd.getPropertyType());
     if (isCollection) {
-      ParameterizedType pt = (ParameterizedType) (pd.getReadMethod().getGenericReturnType());
+      ParameterizedType pt = (ParameterizedType) (pd.getReadMethod()
+          .getGenericReturnType());
       return (Class<?>) pt.getActualTypeArguments()[0];
     } else {
       throw new IllegalArgumentException("PropertyDescriptor does not describe a collection property.");
@@ -182,7 +183,7 @@ class ReflectionUtil {
 
   /**
    * @return Returns <code>true</code> if the property the specified {@link PropertyDescriptor} points to is a
-   * collection, otherwise <code>false</code> is returned.
+   *         collection, otherwise <code>false</code> is returned.
    */
   public static boolean isCollection(PropertyDescriptor pd) {
     return isCollection(pd.getPropertyType());
@@ -190,7 +191,7 @@ class ReflectionUtil {
 
   /**
    * @return Returns <code>true</code> if the type is a
-   * collection, otherwise <code>false</code> is returned.
+   *         collection, otherwise <code>false</code> is returned.
    */
   public static boolean isCollection(Class<?> propertyType) {
     return Collection.class.isAssignableFrom(propertyType);
@@ -207,7 +208,7 @@ class ReflectionUtil {
    * used by the library for any reflective purpose.
    * </p>
    *
-   * @param type          The type of Java Bean.
+   * @param type The type of Java Bean.
    * @param fieldSelector The field selector lambda performing a single get-method call to select a property.
    * @return Returns the {@link PropertyDescriptor} that was selected by the {@link TypedSelector}.
    */
@@ -246,17 +247,17 @@ class ReflectionUtil {
    * Ensures that the specified property name is a property in the specified
    * {@link Set} of {@link PropertyDescriptor}s.
    *
-   * @param type                   The inspected type.
-   * @param propertyName           The property name.
+   * @param type The inspected type.
+   * @param propertyName The property name.
    * @param collectionSamplingMode {@link CollectionSamplingMode} defines how collection fields are sampled.
    */
   static PropertyDescriptor getPropertyDescriptorOrFail(Class<?> type, String propertyName,
       CollectionSamplingMode collectionSamplingMode) {
     Optional<PropertyDescriptor> property;
-    property = Properties
-        .getProperties(type, collectionSamplingMode)
+    property = Properties.getProperties(type, collectionSamplingMode)
         .stream()
-        .filter(pd -> pd.getName().equals(propertyName))
+        .filter(pd -> pd.getName()
+            .equals(propertyName))
         .findFirst();
     if (property.isPresent()) {
       return property.get();
@@ -292,7 +293,7 @@ class ReflectionUtil {
    *
    * @param collectionType The actual collection instance.
    * @return Returns the {@link Collector} that creates a new {@link Collection}
-   * of the same type.
+   *         of the same type.
    */
   @SuppressWarnings("rawtypes")
   static Collector getCollector(Class<?> collectionType) {
@@ -310,10 +311,11 @@ class ReflectionUtil {
    *
    * @param method the method
    * @return <code>true</code>, if return type is not {@link Void} or
-   * <code>false</code> otherwise.
+   *         <code>false</code> otherwise.
    */
   static boolean hasReturnType(Method method) {
-    return !method.getReturnType().equals(Void.TYPE);
+    return !method.getReturnType()
+        .equals(Void.TYPE);
   }
 
   static boolean isGetterOrSetter(Method method) {
@@ -321,7 +323,8 @@ class ReflectionUtil {
   }
 
   static boolean isSetter(Method method) {
-    boolean validName = method.getName().startsWith(SET);
+    boolean validName = method.getName()
+        .startsWith(SET);
     boolean hasArguments = hasArguments(method, 1);
     boolean hasReturnType = hasReturnType(method);
     return validName && !hasReturnType && hasArguments;
@@ -329,7 +332,10 @@ class ReflectionUtil {
 
   static boolean isGetter(Method method) {
     boolean isBool = isBoolGetter(method);
-    boolean validName = (isBool ? method.getName().startsWith(IS) : method.getName().startsWith(GET));
+    boolean validName = (isBool ? method.getName()
+        .startsWith(IS)
+        : method.getName()
+            .startsWith(GET));
     boolean hasArguments = hasArguments(method);
     boolean hasReturnType = hasReturnType(method);
     return validName && hasReturnType && !hasArguments;
@@ -386,15 +392,15 @@ class ReflectionUtil {
    * proxy. (Proxy instances are not classes of the type the method was declared
    * in.)
    *
-   * @param method       The method to be invoked
+   * @param method The method to be invoked
    * @param targetObject The target object or proxy instance.
-   * @param args         (Optional) Arguments to pass to the invoked method or
-   *                     <code>null</code> indicating no parameters.
+   * @param args (Optional) Arguments to pass to the invoked method or
+   *        <code>null</code> indicating no parameters.
    * @return Returns the return value of the method on demand.
-   * @throws IllegalAccessException    Thrown on any access error.
+   * @throws IllegalAccessException Thrown on any access error.
    * @throws InvocationTargetException Thrown on any invocation error.
-   * @throws SecurityException         Thrown if the reflective operation is not allowed
-   * @throws NoSuchMethodException     Thrown if the proxy instance does not provide the desired method.
+   * @throws SecurityException Thrown if the reflective operation is not allowed
+   * @throws NoSuchMethodException Thrown if the proxy instance does not provide the desired method.
    */
   static Object invokeMethodProxySafe(Method method, Object targetObject, Object... args)
       throws IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
@@ -402,7 +408,8 @@ class ReflectionUtil {
     Class<?> clazz = targetObject.getClass();
     if (Proxy.isProxyClass(clazz)) {
       // schuettec - 08.02.2017 : Find the method on the specified proxy.
-      effectiveMethod = targetObject.getClass().getMethod(method.getName(), method.getParameterTypes());
+      effectiveMethod = targetObject.getClass()
+          .getMethod(method.getName(), method.getParameterTypes());
     }
     if (args == null) {
       return effectiveMethod.invoke(targetObject);

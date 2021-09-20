@@ -27,7 +27,8 @@ class Properties {
    */
   static String asStringWithType(PropertyDescriptor pd) {
     String sourceClassname = Properties.getPropertyClass(pd);
-    return String.format("Property '%s' (%s) in %s", pd.getName(), pd.getPropertyType().getName(), sourceClassname);
+    return String.format("Property '%s' (%s) in %s", pd.getName(), pd.getPropertyType()
+        .getName(), sourceClassname);
   }
 
   /**
@@ -48,24 +49,25 @@ class Properties {
    * @return Returns the class name of the declaring class.
    */
   private static String getPropertyClass(PropertyDescriptor propertyDescriptor) {
-    return propertyDescriptor.getReadMethod().getDeclaringClass().getName();
+    return propertyDescriptor.getReadMethod()
+        .getDeclaringClass()
+        .getName();
   }
 
   /**
    * Returns a {@link Set} of properties with read and write access.
    *
-   * @param inspectType            The type to inspect.
+   * @param inspectType The type to inspect.
    * @param collectionSamplingMode {@link CollectionSamplingMode} to be used.
    * @return Returns the list of {@link PropertyDescriptor}s that grant read and
-   * write access.
+   *         write access.
    * @throws ReflectionException Thrown on any introspection error.
    */
   static Set<PropertyDescriptor> getProperties(Class<?> inspectType, CollectionSamplingMode collectionSamplingMode) {
     try {
       BeanInfo beanInfo = Introspector.getBeanInfo(inspectType);
       PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-      return new HashSet<>(Arrays
-          .asList(propertyDescriptors)
+      return new HashSet<>(Arrays.asList(propertyDescriptors)
           .stream()
           .filter(propertyDescriptor -> isRelevantProperty(propertyDescriptor, collectionSamplingMode))
           .collect(Collectors.toList()));
@@ -76,7 +78,8 @@ class Properties {
 
   private static boolean isRelevantProperty(PropertyDescriptor propertyDescriptor,
       CollectionSamplingMode collectionSamplingMode) {
-    if (propertyDescriptor.getName().equals("class")) {
+    if (propertyDescriptor.getName()
+        .equals("class")) {
       return false;
     }
 
