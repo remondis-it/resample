@@ -32,7 +32,8 @@ public class SuppliersTest {
     Function<FieldInfo, Object> f = enumValueSupplier();
     assertThatThrownBy(() -> {
       f.apply(new FieldInfoImpl("propertyName", LocalDate.class));
-    }).hasMessageStartingWith("Cannot supply enum value from non-enum type:").isInstanceOf(IllegalAccessError.class);
+    }).hasMessageStartingWith("Cannot supply enum value from non-enum type:")
+        .isInstanceOf(IllegalAccessError.class);
   }
 
   @Test
@@ -52,7 +53,8 @@ public class SuppliersTest {
 
   @Test
   public void shouldReturnLocalDateYesterday() {
-    LocalDate expected = LocalDate.of(2018, 10, 30).minus(1, ChronoUnit.DAYS);
+    LocalDate expected = LocalDate.of(2018, 10, 30)
+        .minus(1, ChronoUnit.DAYS);
     Function<FieldInfo, LocalDate> f = localDateSupplier(2018, 10, 30);
     LocalDate retVal = f.apply(new FieldInfoImpl("start", LocalDate.class));
     assertEquals(expected, retVal);
@@ -62,7 +64,8 @@ public class SuppliersTest {
 
   @Test
   public void shouldReturnLocalDateTomorrow() {
-    LocalDate expected = LocalDate.of(2018, 10, 30).plus(1, ChronoUnit.DAYS);
+    LocalDate expected = LocalDate.of(2018, 10, 30)
+        .plus(1, ChronoUnit.DAYS);
     Function<FieldInfo, LocalDate> f = localDateSupplier(2018, 10, 30);
     LocalDate retVal = f.apply(new FieldInfoImpl("end", LocalDate.class));
     assertEquals(expected, retVal);
@@ -173,19 +176,26 @@ public class SuppliersTest {
   public void bigDecimalSupplier_shouldProvideBigDecimal() throws IntrospectionException {
     FieldInfo field = new FieldInfo(new PropertyDescriptor("number", Dummy.class), BigDecimal.class);
 
-    assertEquals(BigDecimal.valueOf(42), Suppliers.bigDecimalSampleSupplier(42).newInstance(field));
-    assertEquals(BigDecimal.valueOf(42.11), Suppliers.bigDecimalSampleSupplier(42.11).newInstance(field));
-    assertEquals(BigDecimal.ONE, Suppliers.oneBigDecimalSampleSupplier().newInstance(field));
-    assertEquals(BigDecimal.ZERO, Suppliers.defaultBigDecimalSampleSupplier().newInstance(field));
+    assertEquals(BigDecimal.valueOf(42), Suppliers.bigDecimalSampleSupplier(42)
+        .newInstance(field));
+    assertEquals(BigDecimal.valueOf(42.11), Suppliers.bigDecimalSampleSupplier(42.11)
+        .newInstance(field));
+    assertEquals(BigDecimal.ONE, Suppliers.oneBigDecimalSampleSupplier()
+        .newInstance(field));
+    assertEquals(BigDecimal.ZERO, Suppliers.defaultBigDecimalSampleSupplier()
+        .newInstance(field));
   }
 
   @Test
   public void bigIntegerSupplier_shouldProvideBigInteger() throws IntrospectionException {
     FieldInfo field = new FieldInfo(new PropertyDescriptor("number", Dummy.class), BigInteger.class);
 
-    assertEquals(BigInteger.valueOf(42), Suppliers.bigIntegerSampleSupplier(42).newInstance(field));
-    assertEquals(BigInteger.ONE, Suppliers.oneBigIntegerSampleSupplier().newInstance(field));
-    assertEquals(BigInteger.ZERO, Suppliers.defaultBigIntegerSampleSupplier().newInstance(field));
+    assertEquals(BigInteger.valueOf(42), Suppliers.bigIntegerSampleSupplier(42)
+        .newInstance(field));
+    assertEquals(BigInteger.ONE, Suppliers.oneBigIntegerSampleSupplier()
+        .newInstance(field));
+    assertEquals(BigInteger.ZERO, Suppliers.defaultBigIntegerSampleSupplier()
+        .newInstance(field));
   }
 
   @Test
@@ -194,8 +204,11 @@ public class SuppliersTest {
     FieldInfo stringField = new FieldInfo(new PropertyDescriptor("number", Dummy.class), String.class);
     FieldInfo dummyField = new FieldInfo(new PropertyDescriptor("number", Dummy.class), Dummy.class);
 
-    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class).newInstance(numberField));
-    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class).newInstance(stringField));
-    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class).newInstance(dummyField));
+    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+        .newInstance(numberField));
+    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+        .newInstance(stringField));
+    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+        .newInstance(dummyField));
   }
 }
