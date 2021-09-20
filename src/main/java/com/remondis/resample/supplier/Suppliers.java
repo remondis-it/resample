@@ -44,9 +44,11 @@ public class Suppliers {
   @SuppressWarnings("unchecked")
   public static <T> Function<FieldInfo, T> enumValueSupplier() {
     return (fi) -> {
-      Object[] enumConstants = fi.getType().getEnumConstants();
+      Object[] enumConstants = fi.getType()
+          .getEnumConstants();
       if (isNull(enumConstants)) {
-        throw new IllegalAccessError("Cannot supply enum value from non-enum type: " + fi.getType().getName());
+        throw new IllegalAccessError("Cannot supply enum value from non-enum type: " + fi.getType()
+            .getName());
       } else {
         return (T) enumConstants[0];
       }
@@ -54,43 +56,45 @@ public class Suppliers {
   }
 
   /**
-   * @param year       The year to supply.
-   * @param month      The month to supply.
+   * @param year The year to supply.
+   * @param month The month to supply.
    * @param dayOfMonth The day of month to supply.
    * @return Returns a period supplier that generates {@link LocalDate}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link LocalDate}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link LocalDate}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link LocalDate}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link LocalDate}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<LocalDate> localDateSampleSupplier(int year, int month, int dayOfMonth) {
     return new FunctionSupplier<>(LocalDate.class, localDateSupplier(year, month, dayOfMonth));
   }
 
   /**
-   * @param year       The year to supply.
-   * @param month      The month to supply.
+   * @param year The year to supply.
+   * @param month The month to supply.
    * @param dayOfMonth The day of month to supply.
    * @return Returns a period supplier that generates {@link LocalDate}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link LocalDate}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link LocalDate}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link LocalDate}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link LocalDate}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, LocalDate> localDateSupplier(int year, int month, int dayOfMonth) {
     return (info) -> {
       if (isPeriodStartField(info)) {
-        return LocalDate.of(year, month, dayOfMonth).minus(1, ChronoUnit.DAYS);
+        return LocalDate.of(year, month, dayOfMonth)
+            .minus(1, ChronoUnit.DAYS);
       } else if (isPeriodEndField(info)) {
-        return LocalDate.of(year, month, dayOfMonth).plus(1, ChronoUnit.DAYS);
+        return LocalDate.of(year, month, dayOfMonth)
+            .plus(1, ChronoUnit.DAYS);
       } else {
         return LocalDate.of(year, month, dayOfMonth);
       }
@@ -99,14 +103,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
       int minute, int second, int millis) {
@@ -115,14 +119,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
       int second, int millis) {
@@ -139,14 +143,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'start' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'start' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay) {
     return new FunctionSupplier<>(Date.class, dateSupplier(year, month, dayOfMonth, hourOfDay));
@@ -154,14 +158,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay) {
     final Calendar cal = Calendar.getInstance();
@@ -177,14 +181,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
       int minute) {
@@ -193,14 +197,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute) {
     final Calendar cal = Calendar.getInstance();
@@ -216,14 +220,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static FunctionSupplier<Date> dateSampleSupplier(int year, int month, int dayOfMonth, int hourOfDay,
       int minute, int second) {
@@ -232,14 +236,14 @@ public class Suppliers {
 
   /**
    * @return Returns a period supplier that generates {@link Date}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link Date}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link Date}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link Date}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link Date}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, Date> dateSupplier(int year, int month, int dayOfMonth, int hourOfDay, int minute,
       int second) {
@@ -260,12 +264,15 @@ public class Suppliers {
       cal.setTime(time);
       if (isPeriodStartField(info)) {
         cal.add(Calendar.DATE, -1);
-        return new Date(cal.getTime().getTime());
+        return new Date(cal.getTime()
+            .getTime());
       } else if (isPeriodEndField(info)) {
         cal.add(Calendar.DATE, 1);
-        return new Date(cal.getTime().getTime());
+        return new Date(cal.getTime()
+            .getTime());
       } else {
-        return new Date(cal.getTime().getTime());
+        return new Date(cal.getTime()
+            .getTime());
       }
     };
   }
@@ -281,7 +288,8 @@ public class Suppliers {
   static boolean containsIngoreCase(String string, String pattern) {
     requireNonNull(pattern, "pattern");
     requireNonNull(string, "string");
-    return string.toLowerCase().contains(pattern.toLowerCase());
+    return string.toLowerCase()
+        .contains(pattern.toLowerCase());
   }
 
   /**
@@ -301,14 +309,14 @@ public class Suppliers {
   /**
    * @param zone The {@link ZoneId} to use.
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link ZonedDateTime}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link ZonedDateTime}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link ZonedDateTime}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link ZonedDateTime}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static SampleSupplier<ZonedDateTime> zonedDateTimeSampleSupplier(int year, int month, int dayOfMonth, int hour,
       int minute, int second, int nanoOfSecond, ZoneId zone) {
@@ -321,25 +329,23 @@ public class Suppliers {
   /**
    * @param zone The {@link ZoneId} to use.
    * @return Returns a period supplier that generates {@link ZonedDateTime}s:
-   * <ul>
-   * <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
-   * returned
-   * as {@link ZonedDateTime}.</li>
-   * <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
-   * as
-   * {@link ZonedDateTime}.</li>
-   * <li>For all other field names the generation time is returned.</li>
+   *         <ul>
+   *         <li>If the field name contains the word 'from' or 'start' yesterday relative to the specified date is
+   *         returned
+   *         as {@link ZonedDateTime}.</li>
+   *         <li>If the field name contains the word 'to' or 'end' tomorrow relative to the specified date is returned
+   *         as
+   *         {@link ZonedDateTime}.</li>
+   *         <li>For all other field names the generation time is returned.</li>
    */
   public static Function<FieldInfo, ZonedDateTime> zonedDateTimeSupplier(int year, int month, int dayOfMonth, int hour,
       int minute, int second, int nanoOfSecond, ZoneId zone) {
     return (info) -> {
       if (isPeriodStartField(info)) {
-        return ZonedDateTime
-            .of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
+        return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
             .minus(1, ChronoUnit.DAYS);
       } else if (isPeriodEndField(info)) {
-        return ZonedDateTime
-            .of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
+        return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone)
             .plus(1, ChronoUnit.DAYS);
       } else {
         return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond, zone);
@@ -375,8 +381,10 @@ public class Suppliers {
    */
   public static Function<FieldInfo, String> fullyQualifiedFieldNameStringSupplier() {
     return (fi) -> {
-      return String.format("%s.%s", fi.getProperty().getReadMethod().getDeclaringClass().getName(),
-          fi.getPropertyName());
+      return String.format("%s.%s", fi.getProperty()
+          .getReadMethod()
+          .getDeclaringClass()
+          .getName(), fi.getPropertyName());
     };
   }
 
@@ -392,8 +400,10 @@ public class Suppliers {
    */
   public static Function<FieldInfo, String> shortQualifiedFieldNameStringSupplier() {
     return (fi) -> {
-      return String.format("%s.%s", fi.getProperty().getReadMethod().getDeclaringClass().getSimpleName(),
-          fi.getPropertyName());
+      return String.format("%s.%s", fi.getProperty()
+          .getReadMethod()
+          .getDeclaringClass()
+          .getSimpleName(), fi.getPropertyName());
     };
   }
 
