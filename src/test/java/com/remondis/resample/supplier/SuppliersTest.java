@@ -189,9 +189,9 @@ public class SuppliersTest {
 
     assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
         .newInstance(numberField));
-    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+    assertNull(Suppliers.nullValueSampleSupplier(String.class)
         .newInstance(stringField));
-    assertNull(Suppliers.nullValueSampleSupplier(BigDecimal.class)
+    assertNull(Suppliers.nullValueSampleSupplier(Dummy.class)
         .newInstance(dummyField));
   }
 }
