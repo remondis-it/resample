@@ -92,7 +92,8 @@ public final class Sample<T> implements Supplier<T> {
    * @return Returns this object for method chaining.
    */
   public Sample<T> collectionSamplingMode(CollectionSamplingMode collectionSamplingMode) {
-    this.collectionSamplingMode = Objects.requireNonNull(collectionSamplingMode);
+    Objects.requireNonNull(collectionSamplingMode, "CollectionSamplingMode must not be null.");
+    this.collectionSamplingMode = collectionSamplingMode;
     return this;
   }
 
