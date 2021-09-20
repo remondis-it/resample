@@ -78,6 +78,9 @@ ReSample provides the following features to create test data fixtures:
   - other Sample-instances
 - Lists and Maps are supported
 - Auto-sampling: Applies a configuration recursively to reduce configuration overhead.
+- 2 Collection-Sampling-Modes:
+  - Default: Sampling Collections and using bean field setter
+  - JAXB-Support: Sampling Elements and adding all be using collection field getter
 - Ready to use suppliers are shipped with this library
   - `LocalDate` supplier
   - `Date` supplier

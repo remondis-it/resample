@@ -17,9 +17,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,6 +55,8 @@ public final class Sample<T> implements Supplier<T> {
 
   private boolean useAutoSampling;
 
+  private CollectionSamplingMode collectionSamplingMode = CollectionSamplingMode.USE_SETTER_METHODE;
+
   Sample(Class<T> type) {
     super();
     this.type = type;
@@ -82,11 +86,22 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   /**
+   * Configures the {@link Sample} instance to use the given <b>collectionSamplingMode</b>.
+   * Default is {@link CollectionSamplingMode#USE_SETTER_METHODE}
+   *
+   * @return Returns this object for method chaining.
+   */
+  public Sample<T> collectionSamplingMode(CollectionSamplingMode collectionSamplingMode) {
+    this.collectionSamplingMode = Objects.requireNonNull(collectionSamplingMode);
+    return this;
+  }
+
+  /**
    * Configures the specified {@link Sample} instance to be used by this
    * {@link Sample}. The specified sampler will be used by type.
    *
    * @return Returns {@link SettingBuilder} to specify the scope of this
-   *         supplier.
+   * supplier.
    */
   public <S> Sample<T> useSample(Sample<S> sample) {
     use((Supplier<S>) sample).forType(sample.getType());
@@ -99,7 +114,7 @@ public final class Sample<T> implements Supplier<T> {
    * object that is returned by this method.
    *
    * @return Returns {@link SettingBuilder} to specify the scope of this
-   *         supplier.
+   * supplier.
    */
   public <S> SettingBuilder<T, S> use(Supplier<S> supplier) {
     return use(fieldInfo -> {
@@ -116,11 +131,10 @@ public final class Sample<T> implements Supplier<T> {
    * </p>
    *
    * @return Returns {@link SettingBuilder} to specify the scope of this
-   *         supplier.
+   * supplier.
    */
   public <S> Sample<T> use(SampleSupplier<S> sampleSupplier) {
-    this.use(sampleSupplier::newInstance)
-        .forType(sampleSupplier.getType());
+    this.use(sampleSupplier::newInstance).forType(sampleSupplier.getType());
     return this;
   }
 
@@ -135,7 +149,7 @@ public final class Sample<T> implements Supplier<T> {
    * </p>
    *
    * @return Returns {@link SettingBuilder} to specify the scope of this
-   *         supplier.
+   * supplier.
    */
   public <S> SettingBuilder<T, S> use(Function<FieldInfo, S> function) {
     requireNonNull(function, "Function must not be null.");
@@ -146,7 +160,7 @@ public final class Sample<T> implements Supplier<T> {
    * Configures a {@link Function} to be used as enum value supplier function.
    *
    * @return Returns {@link SettingBuilder} to specify the scope of this
-   *         supplier.
+   * supplier.
    */
   public Sample<T> useForEnum(Function<FieldInfo, Enum<?>> function) {
     this.enumValueSupplier = function;
@@ -184,7 +198,11 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   public Class<T> getType() {
-    return type;
+    return this.type;
+  }
+
+  public CollectionSamplingMode getCollectionSamplingMode() {
+    return this.collectionSamplingMode;
   }
 
   /**
@@ -229,20 +247,19 @@ public final class Sample<T> implements Supplier<T> {
 
   private Set<PropertyDescriptor> setAllValuesByMapSampling(Set<PropertyDescriptor> hitProperties, T newInstance) {
     Set<PropertyDescriptor> notHitFields = getNotHitFields(hitProperties);
-    Set<PropertyDescriptor> hitFields = notHitFields.stream()
+    Set<PropertyDescriptor> hitFields = notHitFields
+        .stream()
         .filter(pd -> Map.class.isAssignableFrom(pd.getPropertyType()))
         .filter(pd -> setValueByMapSampling(pd, newInstance))
         .collect(Collectors.toSet());
     return hitFields;
   }
 
-  @SuppressWarnings({
-      "rawtypes", "unchecked"
+  @SuppressWarnings({ "rawtypes", "unchecked"
   })
   private boolean setValueByMapSampling(PropertyDescriptor pd, T newInstance) {
 
-    ParameterizedType pt = (ParameterizedType) pd.getReadMethod()
-        .getGenericReturnType();
+    ParameterizedType pt = (ParameterizedType) pd.getReadMethod().getGenericReturnType();
     Type[] actualTypeArguments = pt.getActualTypeArguments();
 
     Map newMap = new Hashtable();
@@ -273,8 +290,7 @@ public final class Sample<T> implements Supplier<T> {
         Function<FieldInfo, ?> supplier = typeSettings.get(type);
         return supplier.apply(fi);
       } else if (useAutoSampling) {
-        @SuppressWarnings("rawtypes")
-        Sample autoSampleSupplier = createAutoSampling(pd, type);
+        @SuppressWarnings("rawtypes") Sample autoSampleSupplier = createAutoSampling(pd, type);
         return autoSampleSupplier.newInstance();
       } else {
         return null;
@@ -285,7 +301,8 @@ public final class Sample<T> implements Supplier<T> {
   private Set<PropertyDescriptor> setAllValuesByAutoSampling(Set<PropertyDescriptor> hitProperties, T newInstance) {
     if (useAutoSampling) {
       Set<PropertyDescriptor> notHitFields = getNotHitFields(hitProperties);
-      Set<PropertyDescriptor> hitFields = notHitFields.stream()
+      Set<PropertyDescriptor> hitFields = notHitFields
+          .stream()
           .filter(pd -> setValueByAutoSampling(pd, newInstance))
           .collect(Collectors.toSet());
       return hitFields;
@@ -356,24 +373,19 @@ public final class Sample<T> implements Supplier<T> {
 
   private Set<PropertyDescriptor> setAllEnumValues(T newInstance) {
     if (nonNull(enumValueSupplier)) {
-      return Properties.getProperties(type)
-          .stream()
-          .filter(pd -> {
-            Class<?> propertyType = pd.getPropertyType();
-            return propertyType.isEnum() || (isCollection(propertyType) && getCollectionType(pd).isEnum());
-          })
-          .filter(pd -> {
-            return !fieldSettings.containsKey(pd);
-          })
-          .map(pd -> {
-            if (isCollection(pd.getPropertyType())) {
-              setValue(pd, newInstance, wrapInList(pd, enumValueSupplier));
-            } else {
-              setValue(pd, newInstance, enumValueSupplier);
-            }
-            return pd;
-          })
-          .collect(Collectors.toSet());
+      return Properties.getProperties(type, collectionSamplingMode).stream().filter(pd -> {
+        Class<?> propertyType = pd.getPropertyType();
+        return propertyType.isEnum() || (isCollection(propertyType) && getCollectionType(pd).isEnum());
+      }).filter(pd -> {
+        return !fieldSettings.containsKey(pd);
+      }).map(pd -> {
+        if (isCollection(pd.getPropertyType())) {
+          setValue(pd, newInstance, wrapInList(pd, enumValueSupplier));
+        } else {
+          setValue(pd, newInstance, enumValueSupplier);
+        }
+        return pd;
+      }).collect(Collectors.toSet());
     } else {
       return Collections.emptySet();
     }
@@ -383,7 +395,8 @@ public final class Sample<T> implements Supplier<T> {
   private Function<FieldInfo, ?> wrapInList(PropertyDescriptor pd, Function<FieldInfo, ?> supplier) {
     return (fi) -> {
       Class<?> collectionType = getCollectionType(pd);
-      return asList(supplier.apply(new FieldInfo(pd, collectionType))).stream()
+      return asList(supplier.apply(new FieldInfo(pd, collectionType)))
+          .stream()
           .collect(getCollector(pd.getPropertyType()));
 
     };
@@ -395,88 +408,70 @@ public final class Sample<T> implements Supplier<T> {
       if (!properties.isEmpty()) {
         String message = properties.stream()
             // .map(PropertyDescriptor::getName)
-            .collect(
-                () -> new StringBuilder(
-                    "The following properties were not covered by the sample generator:\nFor class '")
-                        .append(type.getName())
-                        .append("'\n"),
-                (acc, pd) -> acc.append("- ")
-                    .append(pd.getName())
-                    .append(", accessed by ")
-                    .append(pd.getPropertyType()
-                        .getName())
-                    .append(" ")
-                    .append(pd.getReadMethod()
-                        .getName())
-                    .append("()")
-                    .append(", class: ")
-                    .append(pd.getReadMethod()
-                        .getDeclaringClass())
-                    .append("\n"),
-                (sb1, sb2) -> sb1.append(sb2.toString()))
-            .toString();
+            .collect(() -> new StringBuilder(
+                "The following properties were not covered by the sample generator:\nFor class '")
+                .append(type.getName())
+                .append("'\n"), (acc, pd) -> acc
+                .append("- ")
+                .append(pd.getName())
+                .append(", accessed by ")
+                .append(pd.getPropertyType().getName())
+                .append(" ")
+                .append(pd.getReadMethod().getName())
+                .append("()")
+                .append(", class: ")
+                .append(pd.getReadMethod().getDeclaringClass())
+                .append("\n"), (sb1, sb2) -> sb1.append(sb2.toString())).toString();
         throw new SampleException(message);
       }
     }
   }
 
   private Set<PropertyDescriptor> getNotHitFields(Set<PropertyDescriptor> hitProperties) {
-    Set<PropertyDescriptor> properties = Properties.getProperties(type);
+    Set<PropertyDescriptor> properties = Properties.getProperties(type, collectionSamplingMode);
     properties.removeAll(hitProperties);
     return properties;
   }
 
   private Set<PropertyDescriptor> setAllValuesForPrimitiveFields(T newInstance) {
-    return Properties.getProperties(type)
-        .stream()
-        .filter(pd -> {
-          return isPrimitiveCompatible(pd.getPropertyType()) || isPrimitiveCollection(pd);
-        })
-        .map(pd -> {
-          Class<?> propertyType = pd.getPropertyType();
-          if (isPrimitiveCollection(pd)) {
-            Class<?> collectionType = getCollectionType(pd);
-            @SuppressWarnings("unchecked")
-            Object valueToSet = asList(defaultValue(collectionType)).stream()
-                .collect(getCollector(propertyType));
-            writeOrFail(pd, newInstance, valueToSet);
-          } else {
-            writeOrFail(pd, newInstance, defaultValue(propertyType));
-          }
-          return pd;
-        })
-        .collect(Collectors.toSet());
+    return Properties.getProperties(type, collectionSamplingMode).stream().filter(pd -> {
+      return isPrimitiveCompatible(pd.getPropertyType()) || isPrimitiveCollection(pd);
+    }).map(pd -> {
+      Class<?> propertyType = pd.getPropertyType();
+      if (isPrimitiveCollection(pd)) {
+        Class<?> collectionType = getCollectionType(pd);
+        @SuppressWarnings("unchecked") Object valueToSet = asList(defaultValue(collectionType))
+            .stream()
+            .collect(getCollector(propertyType));
+        writeOrFail(pd, newInstance, valueToSet);
+      } else {
+        writeOrFail(pd, newInstance, defaultValue(propertyType));
+      }
+      return pd;
+    }).collect(Collectors.toSet());
   }
 
   private Set<PropertyDescriptor> setAllValuesByFieldSettings(T newInstance) {
-    return fieldSettings.entrySet()
-        .stream()
-        .map(e -> {
-          PropertyDescriptor pd = e.getKey();
-          setValueFromFieldSetting(newInstance, pd);
-          return pd;
-        })
-        .collect(Collectors.toSet());
+    return fieldSettings.entrySet().stream().map(e -> {
+      PropertyDescriptor pd = e.getKey();
+      setValueFromFieldSetting(newInstance, pd);
+      return pd;
+    }).collect(Collectors.toSet());
   }
 
   private Set<PropertyDescriptor> setAllValuesByTypeSettingsExcludingFieldSettings(T newInstance) {
-    return Properties.getProperties(type)
-        .stream()
-        .filter(pd -> {
-          return !fieldSettings.containsKey(pd);
-        })
-        .filter(pd -> {
-          if (isCollection(pd)) {
-            return typeSettings.containsKey(getCollectionType(pd));
-          } else {
-            return typeSettings.containsKey(pd.getPropertyType());
-          }
-        })
-        .map(pd -> {
-          setValueFromTypeSetting(newInstance, pd);
-          return pd;
-        })
-        .collect(Collectors.toSet());
+    return Properties.getProperties(type, collectionSamplingMode).stream().filter(pd -> {
+      return !fieldSettings.containsKey(pd);
+    }).filter(pd -> {
+      if (isCollection(pd)) {
+        return typeSettings.containsKey(getCollectionType(pd));
+      } else {
+        return typeSettings.containsKey(pd.getPropertyType());
+      }
+    }).map(pd -> {
+      setValueFromTypeSetting(newInstance, pd);
+      return pd;
+    }).collect(Collectors.toSet());
   }
 
   private void setValueFromTypeSetting(T newInstance, PropertyDescriptor pd) {
@@ -513,9 +508,20 @@ public final class Sample<T> implements Supplier<T> {
 
   void writeOrFail(PropertyDescriptor property, Object targetInstance, Object value) {
     try {
-      Method writeMethod = property.getWriteMethod();
-      writeMethod.setAccessible(true);
-      writeMethod.invoke(targetInstance, value);
+      if (isCollection(property) && CollectionSamplingMode.USE_GETTER_AND_ADD.equals(collectionSamplingMode)) {
+        Method readMethod = property.getReadMethod();
+        readMethod.setAccessible(true);
+        Collection<Object> invoke = (Collection<Object>) readMethod.invoke(targetInstance);
+        if (value instanceof Collection) {
+          invoke.addAll((Collection) value);
+        } else {
+          invoke.add(value);
+        }
+      } else {
+        Method writeMethod = property.getWriteMethod();
+        writeMethod.setAccessible(true);
+        writeMethod.invoke(targetInstance, value);
+      }
     } catch (InvocationTargetException e) {
       throw ReflectionException.invocationTarget(property, e);
     } catch (Exception e) {
@@ -525,25 +531,13 @@ public final class Sample<T> implements Supplier<T> {
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName())
-        .append("'\n");
-    fieldSettings.entrySet()
-        .stream()
-        .forEach(e -> {
-          b.append("- applying value factory for field '")
-              .append(e.getKey()
-                  .getReadMethod()
-                  .getName())
-              .append("'\n");
-        });
-    typeSettings.entrySet()
-        .stream()
-        .forEach(e -> {
-          b.append("- applying value factory producing ")
-              .append(e.getKey()
-                  .getName())
-              .append("\n");
-        });
+    StringBuilder b = new StringBuilder("Creating samples of '").append(type.getName()).append("'\n");
+    fieldSettings.entrySet().stream().forEach(e -> {
+      b.append("- applying value factory for field '").append(e.getKey().getReadMethod().getName()).append("'\n");
+    });
+    typeSettings.entrySet().stream().forEach(e -> {
+      b.append("- applying value factory producing ").append(e.getKey().getName()).append("\n");
+    });
     return b.toString();
   }
 

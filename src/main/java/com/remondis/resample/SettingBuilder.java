@@ -68,7 +68,8 @@ public class SettingBuilder<T, S> {
       // get the property name
       String propertyName = trackedPropertyNames.get(0);
       // find the property descriptor or fail with an exception
-      PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName);
+      PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName,
+          resample.getCollectionSamplingMode());
       resample.addFieldSetting(pd, supplier);
     } else {
       throw zeroInteractions();
@@ -97,7 +98,8 @@ public class SettingBuilder<T, S> {
       // get the property name
       String propertyName = trackedPropertyNames.get(0);
       // find the property descriptor or fail with an exception
-      PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName);
+      PropertyDescriptor pd = getPropertyDescriptorOrFail(sensorType, propertyName,
+          resample.getCollectionSamplingMode());
       Function<FieldInfo, Collection<S>> wrapper = new CollectionSupplierWrapper<>(pd.getPropertyType(), supplier);
       resample.addFieldSetting(pd, wrapper);
     } else {
