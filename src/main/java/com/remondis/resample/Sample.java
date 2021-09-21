@@ -354,6 +354,7 @@ public final class Sample<T> implements Supplier<T> {
     autoSample.checkForNullFields = this.checkForNullFields;
     autoSample.enumValueSupplier = this.enumValueSupplier;
     autoSample.useAutoSampling = this.useAutoSampling;
+    autoSample.collectionSamplingMode = this.collectionSamplingMode;
 
     return autoSample;
   }
