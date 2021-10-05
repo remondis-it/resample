@@ -1,5 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.remondis/resample.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.remondis%22%20AND%20a:%22resample%22)
-![Build](https://github.com/remondis-it/resample/actions/workflows/build/badge.svg)
+![Build](https://github.com/remondis-it/resample/actions/workflows/build.yml/badge.svg)
 
 
 # ReSample - A Test Fixture Generator
