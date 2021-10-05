@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.remondis/resample.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.remondis%22%20AND%20a:%22resample%22)
-[ ![Download](https://api.bintray.com/packages/schuettec/maven/com.remondis.resample/images/download.svg) ](https://bintray.com/schuettec/maven/com.remondis.resample/_latestVersion)
-[![Build Status](https://travis-ci.org/remondis-it/resample.svg?branch=develop)](https://travis-ci.org/remondis-it/resample)
+![Build](https://github.com/remondis-it/resample/actions/workflows/build/badge.svg)
+
 
 # ReSample - A Test Fixture Generator
 
