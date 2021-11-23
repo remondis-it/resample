@@ -7,11 +7,11 @@ public class FieldInfoImpl extends FieldInfo {
   private String nameOverride;
 
   public FieldInfoImpl(PropertyDescriptor pd, Class<?> type) {
-    super(pd, type);
+    super(null, pd, type);
   }
 
   public FieldInfoImpl(String nameOverride, Class<?> type) {
-    super(null, type);
+    super(null, null, type);
     this.nameOverride = nameOverride;
   }
 

@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * @param <T>
  */
-public final class Sample<T> implements Supplier<T> {
+public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
   private Class<T> type;
 
   private Map<Class<?>, Function<FieldInfo, ?>> typeSettings = new Hashtable<>();
@@ -281,7 +281,7 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   private Object sampleMapItem(PropertyDescriptor pd, Class<?> type) {
-    FieldInfo fi = new FieldInfo(pd, type);
+    FieldInfo fi = new FieldInfo(this, pd, type);
     if (type.isEnum()) {
       if (nonNull(enumValueSupplier)) {
         return enumValueSupplier.apply(fi);
@@ -349,13 +349,18 @@ public final class Sample<T> implements Supplier<T> {
       throw AutoSamplingException.autoSamplingFailed(pd, e);
     }
 
+    Sample<S> autoSample = cloneSample(type);
+
+    return autoSample;
+  }
+
+  private <S> Sample<S> cloneSample(Class<S> type) {
     Sample<S> autoSample = Samples.of(type);
     autoSample.typeSettings = new Hashtable<>(this.typeSettings);
     autoSample.checkForNullFields = this.checkForNullFields;
     autoSample.enumValueSupplier = this.enumValueSupplier;
     autoSample.useAutoSampling = this.useAutoSampling;
     autoSample.collectionSamplingMode = this.collectionSamplingMode;
-
     return autoSample;
   }
 
@@ -404,7 +409,7 @@ public final class Sample<T> implements Supplier<T> {
   private Function<FieldInfo, ?> wrapInList(PropertyDescriptor pd, Function<FieldInfo, ?> supplier) {
     return (fi) -> {
       Class<?> collectionType = getCollectionType(pd);
-      return asList(supplier.apply(new FieldInfo(pd, collectionType))).stream()
+      return asList(supplier.apply(new FieldInfo(this, pd, collectionType))).stream()
           .collect(getCollector(pd.getPropertyType()));
 
     };
@@ -519,7 +524,7 @@ public final class Sample<T> implements Supplier<T> {
   }
 
   private void setValue(PropertyDescriptor pd, T newInstance, Function<FieldInfo, ?> supplier) {
-    FieldInfo fieldInfo = new FieldInfo(pd, pd.getPropertyType());
+    FieldInfo fieldInfo = new FieldInfo(this, pd, pd.getPropertyType());
     Object value;
     try {
       value = supplier.apply(fieldInfo);
@@ -588,4 +593,8 @@ public final class Sample<T> implements Supplier<T> {
     return newInstance();
   }
 
+  @Override
+  public <TT> TT createSubtype(Class<TT> subtype) {
+    return cloneSample(subtype).newInstance();
+  }
 }
