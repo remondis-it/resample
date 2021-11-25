@@ -10,14 +10,20 @@ public class FieldInfo {
 
   private PropertyDescriptor property;
   private Class<?> type;
+  private SubtypeSupplier subtypeSupplier;
 
   /**
    * Creates a new {@link FieldInfo}.
    */
-  public FieldInfo(PropertyDescriptor pd, Class<?> type) {
+  public FieldInfo(SubtypeSupplier subtypeSupplier, PropertyDescriptor pd, Class<?> type) {
     super();
+    this.subtypeSupplier = subtypeSupplier;
     this.property = pd;
     this.type = type;
+  }
+
+  public SubtypeSupplier getSubtypeSupplier() {
+    return subtypeSupplier;
   }
 
   /**
