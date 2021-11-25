@@ -1,16 +1,21 @@
 package com.remondis.resample.genericInstantiation;
 
+import java.util.List;
+
 public class Person {
 
   private GenericId<Long> id;
 
-  public Person(GenericId<Long> id) {
-    super();
-    this.id = id;
-  }
+  private List<GenericId<Long>> genericIds;
 
   public Person() {
     super();
+  }
+
+  public Person(GenericId<Long> id, List<GenericId<Long>> genericIds) {
+    super();
+    this.id = id;
+    this.genericIds = genericIds;
   }
 
   public GenericId<Long> getId() {
@@ -19,6 +24,14 @@ public class Person {
 
   public void setId(GenericId<Long> id) {
     this.id = id;
+  }
+
+  public List<GenericId<Long>> getGenericIds() {
+    return genericIds;
+  }
+
+  public void setGenericIds(List<GenericId<Long>> genericIds) {
+    this.genericIds = genericIds;
   }
 
   @Override

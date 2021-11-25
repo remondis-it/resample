@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -175,7 +176,11 @@ class ReflectionUtil {
     if (isCollection) {
       ParameterizedType pt = (ParameterizedType) (pd.getReadMethod()
           .getGenericReturnType());
-      return (Class<?>) pt.getActualTypeArguments()[0];
+      Type type = pt.getActualTypeArguments()[0];
+      if (type instanceof ParameterizedType) {
+        type = ((ParameterizedType) type).getRawType();
+      }
+      return (Class<?>) type;
     } else {
       throw new IllegalArgumentException("PropertyDescriptor does not describe a collection property.");
     }

@@ -593,8 +593,18 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
     return newInstance();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <TT> TT createSubtype(Class<TT> subtype) {
-    return cloneSample(subtype).newInstance();
+  public <TT> TT createSubtype(FieldInfo fieldInfo, Class<TT> subtype) {
+    if (isPrimitiveCompatible(subtype)) {
+      if (typeSettings.containsKey(subtype)) {
+        Function<FieldInfo, ?> supplier = typeSettings.get(subtype);
+        return (TT) supplier.apply(new FieldInfo(this, fieldInfo.getProperty(), subtype));
+      } else {
+        return defaultValue(subtype);
+      }
+    } else {
+      return cloneSample(subtype).newInstance();
+    }
   }
 }

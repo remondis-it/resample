@@ -48,6 +48,7 @@ public class Samples {
           .useForEnum(enumValueSupplier())
           .useAutoSampling();
     }
+
   }
 
 }
