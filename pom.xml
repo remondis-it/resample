@@ -503,12 +503,10 @@
     <dependencies>
 
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>3.2.7</version>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.12.8</version>
         </dependency>
-
-
 
 		<!-- Test dependencies -->
         <dependency>
