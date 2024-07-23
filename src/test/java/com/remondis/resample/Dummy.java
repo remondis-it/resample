@@ -1,12 +1,17 @@
 package com.remondis.resample;
 
+import java.util.Objects;
+
 public class Dummy {
 
   private String field;
 
-  public Dummy(String field) {
+  private String anotherField;
+
+  public Dummy(String field, String anotherField) {
     super();
     this.field = field;
+    this.anotherField = anotherField;
   }
 
   public Dummy() {
@@ -21,12 +26,17 @@ public class Dummy {
     this.field = field;
   }
 
+  public String getAnotherField() {
+    return anotherField;
+  }
+
+  public void setAnotherField(String anotherField) {
+    this.anotherField = anotherField;
+  }
+
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((field == null) ? 0 : field.hashCode());
-    return result;
+    return Objects.hash(field, anotherField);
   }
 
   @Override
@@ -38,12 +48,12 @@ public class Dummy {
     if (getClass() != obj.getClass())
       return false;
     Dummy other = (Dummy) obj;
-    if (field == null) {
-      if (other.field != null)
-        return false;
-    } else if (!field.equals(other.field))
-      return false;
-    return true;
+    return Objects.equals(field, other.field) && Objects.equals(anotherField, other.anotherField);
+  }
+
+  @Override
+  public String toString() {
+    return "Dummy [field=" + field + ", anotherField=" + anotherField + "]";
   }
 
 }
