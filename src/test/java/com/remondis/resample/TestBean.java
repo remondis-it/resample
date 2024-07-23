@@ -98,6 +98,14 @@ public class TestBean {
     this.primitiveLong = primitiveLong;
   }
 
+  public int getPrimitiveInt() {
+    return 0;
+  }
+
+  public Object getObject() {
+    return null;
+  }
+
   @Override
   public String toString() {
     return "TestBean [strings=" + strings + ", dummies=" + dummies + ", wrapperBoolean=" + wrapperBoolean

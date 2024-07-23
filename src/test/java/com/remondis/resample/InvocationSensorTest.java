@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -78,6 +79,31 @@ public class InvocationSensorTest {
   }
 
   @Test
+  public void shouldHandleClassLoaderNull() {
+    InvocationSensor<NoClassLoaderBean> invocationSensor = new InvocationSensor<>(NoClassLoaderBean.class);
+    assertNotNull(invocationSensor.getSensor());
+  }
+
+  @Test
+  public void shouldHandleEmptyCache() {
+    InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+    assertNotNull(invocationSensor.getSensor());
+    assertTrue(InvocationSensor.interceptionHandlerCache.containsKey(Dummy.class));
+  }
+
+  @Test
+  public void shouldReturnDefaultValueForPrimitiveType() {
+    Object result = sensorObject.getPrimitiveInt();
+    assertEquals(0, result);
+  }
+
+  @Test
+  public void shouldReturnNullForObjectType() {
+    Object result = sensorObject.getObject();
+    assertNull(result);
+  }
+
+  @Test
   public void shouldCacheThreadSafe() {
 
     Semaphore s1 = new Semaphore(1);
@@ -88,16 +114,12 @@ public class InvocationSensorTest {
 
     InterceptionHandler<?> interceptionHandler = InvocationSensor.interceptionHandlerCache.get(Dummy.class);
 
-    Thread t1 = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
-        Dummy sensor = invocationSensor.getSensor();
-        sensor.getField();
-        s2.release();
-        s1.acquireUninterruptibly();
-      }
+    Thread t1 = new Thread(() -> {
+      InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+      Dummy sensor = invocationSensor.getSensor();
+      sensor.getField();
+      s2.release();
+      s1.acquireUninterruptibly();
     });
     t1.start();
 
