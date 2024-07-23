@@ -419,7 +419,42 @@
                                         </limit>
                                     </limits>
                                 </rule>
-
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.InvocationSensor</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.97</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.InterceptionHandler</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.66</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.96</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
                             </rules>
                         </configuration>
                     </execution>
