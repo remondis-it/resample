@@ -40,6 +40,7 @@ public class InterceptionHandler<T> {
   }
 
   public boolean hasTrackedProperties() {
-    return nonNull(threadLocalPropertyNames.get()) && !threadLocalPropertyNames.get().isEmpty();
+    return nonNull(threadLocalPropertyNames.get()) && !threadLocalPropertyNames.get()
+        .isEmpty();
   }
 }

@@ -41,17 +41,17 @@ class InvocationSensor<T> {
       this.interceptionHandler = (InterceptionHandler<T>) interceptionHandlerCache.get(superType);
     } else {
       Class<? extends T> proxyClass = new ByteBuddy().subclass(superType)
-              .method(isGetter())
-              .intercept(of((proxy, method, args) -> markPropertyAsCalled(method)))
-              .method(isDeclaredBy(Object.class))
-              .intercept(of((proxy, method, args) -> invokeMethodProxySafe(method, this, args)))
-              .method(not(isGetter()).and(not(isDeclaredBy(Object.class))))
-              .intercept(of((proxy, method, args) -> {
-                throw ReflectionException.notAGetter(method);
-              }))
-              .make()
-              .load(classLoader, ClassLoadingStrategy.Default.INJECTION)
-              .getLoaded();
+          .method(isGetter())
+          .intercept(of((proxy, method, args) -> markPropertyAsCalled(method)))
+          .method(isDeclaredBy(Object.class))
+          .intercept(of((proxy, method, args) -> invokeMethodProxySafe(method, this, args)))
+          .method(not(isGetter()).and(not(isDeclaredBy(Object.class))))
+          .intercept(of((proxy, method, args) -> {
+            throw ReflectionException.notAGetter(method);
+          }))
+          .make()
+          .load(classLoader, ClassLoadingStrategy.Default.INJECTION)
+          .getLoaded();
       this.interceptionHandler = new InterceptionHandler<>();
       this.interceptionHandler.setProxyObject(superType.cast(ReflectionUtil.newInstance(proxyClass)));
       interceptionHandlerCache.put(superType, this.interceptionHandler);
@@ -60,7 +60,8 @@ class InvocationSensor<T> {
 
   private Object markPropertyAsCalled(Method method) {
     String propertyName = toPropertyName(method);
-    interceptionHandler.getThreadLocalPropertyNames().add(propertyName);
+    interceptionHandler.getThreadLocalPropertyNames()
+        .add(propertyName);
     return nullOrDefaultValue(method.getReturnType());
   }
 
@@ -79,7 +80,7 @@ class InvocationSensor<T> {
    * @return Returns the tracked property names.
    */
   List<String> getTrackedPropertyNames() {
-      return interceptionHandler.getTrackedPropertyNames();
+    return interceptionHandler.getTrackedPropertyNames();
   }
 
   /**
@@ -89,14 +90,12 @@ class InvocationSensor<T> {
    *         <code>false</code> is returned.
    */
   boolean hasTrackedProperties() {
-      return interceptionHandler.hasTrackedProperties();
+    return interceptionHandler.hasTrackedProperties();
   }
-
 
   void reset() {
     interceptionHandler.reset();
   }
-
 
   private static Object nullOrDefaultValue(Class<?> returnType) {
     if (returnType.isPrimitive()) {
