@@ -291,6 +291,8 @@
                                         <exclude>com.remondis.resample.supplier.Suppliers</exclude>
                                         <exclude>com.remondis.resample.AutoSamplingException</exclude>
                                         <exclude>com.remondis.resample.Samples.Default</exclude>
+                                        <exclude>com.remondis.resample.Samples.InvocationSensor</exclude>
+                                        <exclude>com.remondis.resample.Samples.InterceptionHandler</exclude>
                                     </excludes>
                                     <element>CLASS</element>
                                     <limits>
