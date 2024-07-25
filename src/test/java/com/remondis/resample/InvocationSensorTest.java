@@ -2,11 +2,15 @@ package com.remondis.resample;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +24,7 @@ public class InvocationSensorTest {
   public void setup() {
     this.sensor = new InvocationSensor<>(TestBean.class);
     this.sensorObject = this.sensor.getSensor();
+    InvocationSensor.interceptionHandlerCache.clear();
   }
 
   @Test
@@ -73,4 +78,87 @@ public class InvocationSensorTest {
     assertFalse(sensor.hasTrackedProperties());
   }
 
+  @Test
+  public void shouldHandleClassLoaderNull() {
+    InvocationSensor<NoClassLoaderBean> invocationSensor = new InvocationSensor<>(NoClassLoaderBean.class);
+    assertNotNull(invocationSensor.getSensor());
+  }
+
+  @Test
+  public void shouldHandleEmptyCache() {
+    InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+    assertNotNull(invocationSensor.getSensor());
+    assertTrue(InvocationSensor.interceptionHandlerCache.containsKey(Dummy.class));
+  }
+
+  @Test
+  public void shouldReturnDefaultValueForPrimitiveType() {
+    Object result = sensorObject.getPrimitiveInt();
+    assertEquals(0, result);
+  }
+
+  @Test
+  public void shouldReturnNullForObjectType() {
+    Object result = sensorObject.getObject();
+    assertNull(result);
+  }
+
+  @Test
+  public void shouldCacheThreadSafe() {
+
+    Semaphore s1 = new Semaphore(1);
+    s1.acquireUninterruptibly();
+
+    Semaphore s2 = new Semaphore(1);
+    s2.acquireUninterruptibly();
+
+    InterceptionHandler<?> interceptionHandler = InvocationSensor.interceptionHandlerCache.get(Dummy.class);
+
+    Thread t1 = new Thread(() -> {
+      InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+      Dummy sensor = invocationSensor.getSensor();
+      sensor.getField();
+      s2.release();
+      s1.acquireUninterruptibly();
+    });
+    t1.start();
+
+    // Hier warte bis t1 mindestens getString() aufgerufen hast
+    s2.acquireUninterruptibly();
+    InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+    List<String> trackedPropertyNames = invocationSensor.getTrackedPropertyNames();
+    assertTrue(trackedPropertyNames.isEmpty());
+    s1.release();
+  }
+
+  @Test
+  public void shouldCache() {
+    assertTrue(InvocationSensor.interceptionHandlerCache.isEmpty());
+    InvocationSensor<Dummy> invocationSensor = new InvocationSensor<>(Dummy.class);
+    assertFalse(InvocationSensor.interceptionHandlerCache.isEmpty());
+    assertTrue(InvocationSensor.interceptionHandlerCache.containsKey(Dummy.class));
+    assertNotNull(InvocationSensor.interceptionHandlerCache.get(Dummy.class));
+
+    InterceptionHandler<?> interceptionHandler = InvocationSensor.interceptionHandlerCache.get(Dummy.class);
+
+    Dummy sensor = invocationSensor.getSensor();
+    sensor.getField();
+
+    List<String> trackedPropertyNames = interceptionHandler.getTrackedPropertyNames();
+    assertEquals(1, trackedPropertyNames.size());
+    assertTrue(trackedPropertyNames.contains("field"));
+
+    sensor.getAnotherField();
+    trackedPropertyNames = interceptionHandler.getTrackedPropertyNames();
+    assertEquals(1, trackedPropertyNames.size());
+    assertTrue(trackedPropertyNames.contains("anotherField"));
+
+    sensor.getField();
+    sensor.getAnotherField();
+    trackedPropertyNames = interceptionHandler.getTrackedPropertyNames();
+    assertEquals(2, trackedPropertyNames.size());
+    assertTrue(trackedPropertyNames.contains("field"));
+    assertTrue(trackedPropertyNames.contains("anotherField"));
+
+  }
 }

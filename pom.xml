@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.remondis</groupId>
     <artifactId>resample</artifactId>
-    <version>0.0.11</version>
+    <version>0.0.12</version>
     <packaging>jar</packaging>
     <name>ReSample</name>
     <url>https://github.com/remondis-it/resample</url>
@@ -257,7 +257,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
+                <version>0.8.12</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -291,6 +291,8 @@
                                         <exclude>com.remondis.resample.supplier.Suppliers</exclude>
                                         <exclude>com.remondis.resample.AutoSamplingException</exclude>
                                         <exclude>com.remondis.resample.Samples.Default</exclude>
+                                        <exclude>com.remondis.resample.InvocationSensor</exclude>
+                                        <exclude>com.remondis.resample.InterceptionHandler</exclude>
                                     </excludes>
                                     <element>CLASS</element>
                                     <limits>
@@ -419,7 +421,42 @@
                                         </limit>
                                     </limits>
                                 </rule>
-
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.InvocationSensor</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.97</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <includes>
+                                        <include>com.remondis.resample.InterceptionHandler</include>
+                                    </includes>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.66</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.96</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
                             </rules>
                         </configuration>
                     </execution>
@@ -505,7 +542,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.8</version>
+            <version>1.14.18</version>
         </dependency>
 
 		<!-- Test dependencies -->

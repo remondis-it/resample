@@ -4,13 +4,15 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.remondis.resample.ReflectionUtil.defaultValue;
 import static com.remondis.resample.ReflectionUtil.invokeMethodProxySafe;
 import static com.remondis.resample.ReflectionUtil.toPropertyName;
+import static java.lang.ClassLoader.getSystemClassLoader;
+import static java.util.Objects.isNull;
 import static net.bytebuddy.implementation.InvocationHandlerAdapter.of;
 import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 import static net.bytebuddy.matcher.ElementMatchers.isGetter;
@@ -24,30 +26,42 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  */
 class InvocationSensor<T> {
 
-  private T proxyObject;
+  static Map<Class<?>, InterceptionHandler<?>> interceptionHandlerCache = new ConcurrentHashMap<>();
 
-  private List<String> propertyNames = new LinkedList<>();
+  private InterceptionHandler<T> interceptionHandler;
 
   InvocationSensor(Class<T> superType) {
-    Class<? extends T> proxyClass = new ByteBuddy().subclass(superType)
-        .method(isGetter())
-        .intercept(of((proxy, method, args) -> markPropertyAsCalled(method)))
-        .method(isDeclaredBy(Object.class))
-        .intercept(of((proxy, method, args) -> invokeMethodProxySafe(method, this, args)))
-        .method(not(isGetter()).and(not(isDeclaredBy(Object.class))))
-        .intercept(of((proxy, method, args) -> {
-          throw ReflectionException.notAGetter(method);
-        }))
-        .make()
-        .load(getClass().getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
-        .getLoaded();
-
-    proxyObject = superType.cast(ReflectionUtil.newInstance(proxyClass));
+    ClassLoader classLoader;
+    if (isNull(superType) || isNull(superType.getClassLoader())) {
+      classLoader = getSystemClassLoader();
+    } else {
+      classLoader = superType.getClassLoader();
+    }
+    if (interceptionHandlerCache.containsKey(superType)) {
+      this.interceptionHandler = (InterceptionHandler<T>) interceptionHandlerCache.get(superType);
+    } else {
+      Class<? extends T> proxyClass = new ByteBuddy().subclass(superType)
+          .method(isGetter())
+          .intercept(of((proxy, method, args) -> markPropertyAsCalled(method)))
+          .method(isDeclaredBy(Object.class))
+          .intercept(of((proxy, method, args) -> invokeMethodProxySafe(method, this, args)))
+          .method(not(isGetter()).and(not(isDeclaredBy(Object.class))))
+          .intercept(of((proxy, method, args) -> {
+            throw ReflectionException.notAGetter(method);
+          }))
+          .make()
+          .load(classLoader, ClassLoadingStrategy.Default.INJECTION)
+          .getLoaded();
+      this.interceptionHandler = new InterceptionHandler<>();
+      this.interceptionHandler.setProxyObject(superType.cast(ReflectionUtil.newInstance(proxyClass)));
+      interceptionHandlerCache.put(superType, this.interceptionHandler);
+    }
   }
 
   private Object markPropertyAsCalled(Method method) {
     String propertyName = toPropertyName(method);
-    propertyNames.add(propertyName);
+    interceptionHandler.getThreadLocalPropertyNames()
+        .add(propertyName);
     return nullOrDefaultValue(method.getReturnType());
   }
 
@@ -57,7 +71,7 @@ class InvocationSensor<T> {
    * @return The proxy.
    */
   T getSensor() {
-    return proxyObject;
+    return interceptionHandler.getProxyObject();
   }
 
   /**
@@ -66,24 +80,21 @@ class InvocationSensor<T> {
    * @return Returns the tracked property names.
    */
   List<String> getTrackedPropertyNames() {
-    return Collections.unmodifiableList(propertyNames);
+    return interceptionHandler.getTrackedPropertyNames();
   }
 
   /**
    * Checks if there were any properties accessed by get calls.
    *
-   * @return Returns <code>true</code> if there were at least one interaction with
-   *         a property. Otherwise <code>false</code> is returned.
+   * @return Returns <code>true</code> if there were at least one interaction with a property. Otherwise
+   *         <code>false</code> is returned.
    */
   boolean hasTrackedProperties() {
-    return !propertyNames.isEmpty();
+    return interceptionHandler.hasTrackedProperties();
   }
 
-  /**
-   * Resets all tracked information.
-   */
   void reset() {
-    propertyNames.clear();
+    interceptionHandler.reset();
   }
 
   private static Object nullOrDefaultValue(Class<?> returnType) {
