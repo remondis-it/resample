@@ -8,6 +8,7 @@ import static com.remondis.resample.ReflectionUtil.isPrimitiveCollection;
 import static com.remondis.resample.ReflectionUtil.isPrimitiveCompatible;
 import static com.remondis.resample.SampleException.valueSupplierException;
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
@@ -19,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
@@ -212,7 +214,7 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
    */
   public T newInstance() {
     try {
-      T newInstance = createNewInstance(type);
+      T newInstance = createNewInstance();
       // Set all primitive properties
       Set<PropertyDescriptor> hitProperties = setAllValuesForPrimitiveFields(newInstance);
       // Set all enum values
@@ -316,8 +318,10 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
 
   private boolean setValueByAutoSampling(PropertyDescriptor pd, T newInstance) {
 
+    boolean isCollection = isCollection(pd);
+
     Class<?> type = null;
-    if (isCollection(pd)) {
+    if (isCollection) {
       type = getCollectionType(pd);
     } else {
       type = pd.getPropertyType();
@@ -326,7 +330,7 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
     Sample<?> autoSample = createAutoSampling(pd, type);
 
     Function<FieldInfo, ?> supplier = null;
-    if (isCollection(pd)) {
+    if (isCollection) {
       supplier = wrapInList(pd, fi -> autoSample.newInstance());
     } else {
       supplier = fi -> autoSample.newInstance();
@@ -365,19 +369,21 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
   }
 
   private void denyNoDefaultConstructor(Class<?> type) {
-    try {
-      type.getConstructor();
-    } catch (NoSuchMethodException | SecurityException e) {
+    if (isNull(Properties.getTypeModel(type, collectionSamplingMode)
+        .getDefaultConstructor())) {
       throw SampleException.noDefaultConstructor(type);
     }
   }
 
-  private static <T> T createNewInstance(Class<T> type)
+  @SuppressWarnings("unchecked")
+  private T createNewInstance()
       throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-    Constructor<T> constructor = type.getConstructor();
-    constructor.setAccessible(true);
-    T newInstance = constructor.newInstance();
-    return newInstance;
+    Constructor<?> constructor = Properties.getTypeModel(type, collectionSamplingMode)
+        .getDefaultConstructor();
+    if (isNull(constructor)) {
+      throw new NoSuchMethodException(type.getName() + ".<init>()");
+    }
+    return (T) constructor.newInstance();
   }
 
   private Set<PropertyDescriptor> setAllEnumValues(T newInstance) {
@@ -447,7 +453,7 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
   }
 
   private Set<PropertyDescriptor> getNotHitFields(Set<PropertyDescriptor> hitProperties) {
-    Set<PropertyDescriptor> properties = Properties.getProperties(type, collectionSamplingMode);
+    Set<PropertyDescriptor> properties = new HashSet<>(Properties.getProperties(type, collectionSamplingMode));
     properties.removeAll(hitProperties);
     return properties;
   }
@@ -539,9 +545,9 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
 
   void writeOrFail(PropertyDescriptor property, Object targetInstance, Object value) {
     try {
+      TypeModel typeModel = Properties.getTypeModel(type, collectionSamplingMode);
       if (isCollection(property) && CollectionSamplingMode.USE_GETTER_AND_ADD.equals(collectionSamplingMode)) {
-        Method readMethod = property.getReadMethod();
-        readMethod.setAccessible(true);
+        Method readMethod = typeModel.getReadMethod(property);
         Collection<Object> invoke = (Collection<Object>) readMethod.invoke(targetInstance);
         if (value instanceof Collection) {
           invoke.addAll((Collection) value);
@@ -549,8 +555,7 @@ public final class Sample<T> implements Supplier<T>, SubtypeSupplier {
           invoke.add(value);
         }
       } else {
-        Method writeMethod = property.getWriteMethod();
-        writeMethod.setAccessible(true);
+        Method writeMethod = typeModel.getWriteMethod(property);
         writeMethod.invoke(targetInstance, value);
       }
     } catch (InvocationTargetException e) {

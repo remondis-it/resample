@@ -8,8 +8,10 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -18,6 +20,20 @@ import java.util.stream.Collectors;
  * @author schuettec
  */
 class Properties {
+
+  /**
+   * Caches the {@link TypeModel} per inspected type and {@link CollectionSamplingMode} so that introspection, generic
+   * type resolution and accessibility checks are only performed once per type.
+   */
+  private static final Map<CollectionSamplingMode, Map<Class<?>, TypeModel>> TYPE_MODEL_CACHE;
+
+  static {
+    Map<CollectionSamplingMode, Map<Class<?>, TypeModel>> cache = new EnumMap<>(CollectionSamplingMode.class);
+    for (CollectionSamplingMode collectionSamplingMode : CollectionSamplingMode.values()) {
+      cache.put(collectionSamplingMode, new ConcurrentHashMap<>());
+    }
+    TYPE_MODEL_CACHE = cache;
+  }
 
   /**
    * A readable string representation for a {@link PropertyDescriptor}.
@@ -59,18 +75,34 @@ class Properties {
    *
    * @param inspectType The type to inspect.
    * @param collectionSamplingMode {@link CollectionSamplingMode} to be used.
-   * @return Returns the list of {@link PropertyDescriptor}s that grant read and
+   * @return Returns an unmodifiable set of {@link PropertyDescriptor}s that grant read and
    *         write access.
    * @throws ReflectionException Thrown on any introspection error.
    */
   static Set<PropertyDescriptor> getProperties(Class<?> inspectType, CollectionSamplingMode collectionSamplingMode) {
+    return getTypeModel(inspectType, collectionSamplingMode).getProperties();
+  }
+
+  /**
+   * Returns the cached {@link TypeModel} for the specified type.
+   *
+   * @param inspectType The type to inspect.
+   * @param collectionSamplingMode {@link CollectionSamplingMode} to be used.
+   * @return Returns the {@link TypeModel} of the specified type.
+   * @throws ReflectionException Thrown on any introspection error.
+   */
+  static TypeModel getTypeModel(Class<?> inspectType, CollectionSamplingMode collectionSamplingMode) {
+    return TYPE_MODEL_CACHE.get(collectionSamplingMode)
+        .computeIfAbsent(inspectType, type -> new TypeModel(type, introspectProperties(type, collectionSamplingMode)));
+  }
+
+  private static Set<PropertyDescriptor> introspectProperties(Class<?> inspectType,
+      CollectionSamplingMode collectionSamplingMode) {
     try {
       BeanInfo beanInfo = Introspector.getBeanInfo(inspectType);
-      PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-      return new HashSet<>(Arrays.asList(propertyDescriptors)
-          .stream()
+      return Arrays.stream(beanInfo.getPropertyDescriptors())
           .filter(propertyDescriptor -> isRelevantProperty(propertyDescriptor, collectionSamplingMode))
-          .collect(Collectors.toList()));
+          .collect(Collectors.toSet());
     } catch (IntrospectionException e) {
       throw new ReflectionException(String.format("Cannot introspect the type %s.", inspectType.getName()));
     }

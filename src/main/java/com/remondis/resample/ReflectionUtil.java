@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -169,18 +170,25 @@ class ReflectionUtil {
   }
 
   /**
+   * Caches the resolved generic collection type per read method, since resolving generic type information is
+   * performed repeatedly for the same property during sample generation.
+   */
+  private static final Map<Method, Class<?>> COLLECTION_TYPE_CACHE = new ConcurrentHashMap<>();
+
+  /**
    * @return Returns the generic type of the collection property the specified {@link PropertyDescriptor} points to.
    */
   public static Class<?> getCollectionType(PropertyDescriptor pd) {
     boolean isCollection = isCollection(pd.getPropertyType());
     if (isCollection) {
-      ParameterizedType pt = (ParameterizedType) (pd.getReadMethod()
-          .getGenericReturnType());
-      Type type = pt.getActualTypeArguments()[0];
-      if (type instanceof ParameterizedType) {
-        type = ((ParameterizedType) type).getRawType();
-      }
-      return (Class<?>) type;
+      return COLLECTION_TYPE_CACHE.computeIfAbsent(pd.getReadMethod(), readMethod -> {
+        ParameterizedType pt = (ParameterizedType) readMethod.getGenericReturnType();
+        Type type = pt.getActualTypeArguments()[0];
+        if (type instanceof ParameterizedType) {
+          type = ((ParameterizedType) type).getRawType();
+        }
+        return (Class<?>) type;
+      });
     } else {
       throw new IllegalArgumentException("PropertyDescriptor does not describe a collection property.");
     }
