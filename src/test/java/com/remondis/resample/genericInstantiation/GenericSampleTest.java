@@ -1,15 +1,15 @@
 package com.remondis.resample.genericInstantiation;
 
 import static com.remondis.resample.genericInstantiation.ReflectionUtil.isCollection;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.Samples;

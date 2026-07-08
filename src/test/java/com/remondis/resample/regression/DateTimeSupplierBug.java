@@ -1,11 +1,11 @@
 package com.remondis.resample.regression;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.Sample;
 import com.remondis.resample.Samples;

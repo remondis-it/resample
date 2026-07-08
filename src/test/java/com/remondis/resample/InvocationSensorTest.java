@@ -2,25 +2,26 @@ package com.remondis.resample;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class InvocationSensorTest {
 
   InvocationSensor<TestBean> sensor;
   TestBean sensorObject;
 
-  @Before
+  @BeforeEach
   public void setup() {
     this.sensor = new InvocationSensor<>(TestBean.class);
     this.sensorObject = this.sensor.getSensor();
@@ -62,14 +63,14 @@ public class InvocationSensorTest {
    * The sensor determines get-methods only by checking the method syntactically. So non-property getter are detected as
    * well.
    */
-  @Test(expected = ReflectionException.class)
+  @Test
   public void shouldRejectRegularMethods() {
-    sensorObject.regularMethod();
+    assertThrows(ReflectionException.class, () -> sensorObject.regularMethod());
   }
 
-  @Test(expected = ReflectionException.class)
+  @Test
   public void shouldNotDelegateToMethodsOveridden() {
-    sensorObject.toString();
+    assertThrows(ReflectionException.class, () -> sensorObject.toString());
   }
 
   @Test
