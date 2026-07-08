@@ -1,11 +1,11 @@
 package com.remondis.resample.supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.beans.IntrospectionException;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FieldInfoImpl;

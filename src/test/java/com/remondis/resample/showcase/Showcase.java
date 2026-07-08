@@ -3,12 +3,12 @@ package com.remondis.resample.showcase;
 import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.Samples;
 

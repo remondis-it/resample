@@ -2,7 +2,7 @@ package com.remondis.resample.autosampling;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.AutoSamplingException;
 import com.remondis.resample.SampleException;

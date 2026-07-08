@@ -5,13 +5,13 @@ import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.fieldNameStringSupplier;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.HashSet;
 
 import com.remondis.resample.Samples;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JaxBListTest {
 

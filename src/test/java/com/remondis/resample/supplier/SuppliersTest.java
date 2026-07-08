@@ -4,8 +4,8 @@ import static com.remondis.resample.supplier.Suppliers.dateSupplier;
 import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static com.remondis.resample.supplier.Suppliers.localDateSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.FieldInfo;
 import com.remondis.resample.FieldInfoImpl;

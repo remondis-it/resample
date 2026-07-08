@@ -2,10 +2,10 @@ package com.remondis.resample.maps;
 
 import static com.remondis.resample.supplier.Suppliers.enumValueSupplier;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.remondis.resample.SampleException;
 import com.remondis.resample.Samples;
